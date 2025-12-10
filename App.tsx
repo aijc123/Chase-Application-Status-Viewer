@@ -55,27 +55,27 @@ const App: React.FC = () => {
   };
 
   if (loading) {
-      return <div className="min-h-screen flex items-center justify-center bg-gray-50 text-gray-400">Loading...</div>;
+      return <div className="h-screen flex items-center justify-center bg-gray-50 text-gray-400 text-sm">Loading...</div>;
   }
 
   return (
     <div className="min-h-screen flex flex-col font-sans">
-      {/* Header */}
+      {/* Header - Made Compact (h-12 instead of h-16) */}
       <header className="bg-chase-navy text-white shadow-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <div className="px-4 h-12 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <ShieldCheck className="h-8 w-8 text-chase-blue bg-white rounded-full p-1" />
-            <h1 className="text-xl font-bold tracking-tight">Chase Status Viewer</h1>
+            <ShieldCheck className="h-6 w-6 text-chase-blue bg-white rounded-full p-0.5" />
+            <h1 className="text-base font-bold tracking-tight">Chase Status</h1>
           </div>
-          <div className="text-xs text-gray-300 hidden sm:block">
-            v0.0.1 • Unofficial
+          <div className="text-[10px] text-gray-300">
+            v1.0.0
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="flex-grow bg-gray-50 p-4 sm:p-6">
-        <div className="max-w-7xl mx-auto">
+      {/* Main Content - Reduced Padding */}
+      <main className="flex-grow bg-gray-50 p-3">
+        <div className="mx-auto">
           {!data ? (
             <InputForm onDataParsed={handleSetData} />
           ) : (
@@ -84,12 +84,11 @@ const App: React.FC = () => {
         </div>
       </main>
 
-      {/* Footer */}
+      {/* Footer - Made Compact */}
       <footer className="bg-white border-t border-gray-200 mt-auto">
-        <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
-          <p className="text-center text-xs text-gray-400">
-            This tool runs locally in your browser. No data is sent to external servers.
-            <br />
+        <div className="px-4 py-2">
+          <p className="text-center text-[10px] text-gray-400 leading-tight">
+            Unofficial tool. Runs locally. <br/>
             Not affiliated with JPMorgan Chase & Co.
           </p>
         </div>

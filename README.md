@@ -1,69 +1,65 @@
-# Chase Application Status Viewer 🛡️
+# Chase Application Status Viewer / Chase 信用卡申请状态查看器 🛡️
 
 ![Version](https://img.shields.io/github/v/release/YOUR_USERNAME/Chase-Application-Status-Viewer?label=Latest%20Version)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
-An unofficial browser extension that reveals the **hidden details** of your Chase Credit Card application status. It helps you find the specific "Decision Engine" codes and reference numbers needed when calling the reconsideration line (Recon).
-
-**🔒 Privacy First:** This tool runs 100% locally in your browser. No data is sent to any external server.
-
----
-
-## 📥 How to Install (For Everyone)
-
-You do **not** need to be a developer to use this.
-
-### 1. Download
-Go to the **[Releases Page](../../releases/latest)** and download the file named **`chase-status-viewer.zip`**.
-
-### 2. Unzip
-Locate the downloaded file and **unzip/extract it**. You should now have a folder (usually named `dist` or `chase-status-viewer`) containing files like `index.html` and `manifest.json`.
-
-### 3. Load into Chrome / Edge / Brave
-1. Open your browser and type `chrome://extensions` in the address bar.
-2. In the top-right corner, turn on the toggle switch for **Developer mode**.
-3. Click the button that says **Load unpacked**.
-4. Select the folder you just unzipped in Step 2.
-
-*Done! The shield icon should appear in your toolbar.*
+**English**: An unofficial browser extension that reveals the **hidden details** of your Chase Credit Card application status (Decision Engine codes, specific Recon numbers, and error details).  
+**中文**: 一个非官方的浏览器插件，用于查看 Chase 信用卡申请背后的**详细状态**（包括被拒原因代码、具体的后门电话 Recon Number 以及内部错误信息）。
 
 ---
 
-## 🚀 How to Use
+## 📥 Installation / 安装方法
 
-1. **Login to Chase**: Go to [Chase.com](https://www.chase.com) and navigate to the "Application Status" page (usually under the main menu > "Application Status").
-2. **Open the Tool**: Click the **Shield Icon** extension in your browser toolbar.
-3. **Scan**: Click the blue **"Scan Current Tab"** button.
-4. **Analyze**:
-   *   **Recon Guide**: If rejected or pending, see exactly which number to call.
-   *   **Reference #**: Copy the Decision Engine Reference Identifier to quote to the agent.
-   *   **Error Codes**: See detailed internal error codes (e.g., `PEND_CALL_SUPPORT` vs `DECLINED`).
+No coding skills required. / 不需要懂代码。
+
+### 1. Download / 下载
+Go to the **[Releases Page](../../releases/latest)**.  
+Download the file named **`chase-status-viewer.zip`**.
+
+前往 **[Releases 页面](../../releases/latest)**，下载名为 **`chase-status-viewer.zip`** 的文件。
+
+### 2. Unzip / 解压
+**Unzip/Extract** the downloaded file. You should see a folder containing `manifest.json`.  
+**解压** 下载好的压缩包。你会得到一个文件夹，里面包含 `manifest.json` 等文件。
+
+### 3. Load into Browser / 导入浏览器
+(Works on Chrome, Edge, Brave, Arc)
+
+1.  Open Chrome and go to `chrome://extensions` (type this in the address bar).
+    *   打开 Chrome 浏览器，在地址栏输入 `chrome://extensions` 并回车。
+2.  **Turn on "Developer mode"** (top-right corner).
+    *   打开右上角的 **"开发者模式" (Developer mode)** 开关。
+3.  Click **"Load unpacked"** (top-left).
+    *   点击左上角的 **"加载已解压的扩展程序" (Load unpacked)** 按钮。
+4.  Select the **folder** you unzipped in Step 2.
+    *   选择你在第 2 步解压出来的**文件夹**。
+
+*🎉 Done! Click the shield icon in your toolbar to start.*  
+*🎉 完成！点击浏览器右上角的盾牌图标即可使用。*
 
 ---
 
-## 🛠️ For Developers (Manual Build)
+## 🚀 How to Use / 使用说明
 
-If you want to modify the code or build it yourself:
-
-1.  Clone the repo:
-    ```bash
-    git clone https://github.com/YOUR_USERNAME/Chase-Application-Status-Viewer.git
-    ```
-2.  Install dependencies:
-    ```bash
-    npm install
-    ```
-3.  Build:
-    ```bash
-    npm run build
-    ```
-4.  Load the `dist` folder into Chrome as an unpacked extension.
+1.  **Login to Chase**: Go to [Chase.com](https://www.chase.com) and verify your identity to reach the "Application Status" page.
+    *   登录 Chase 网银，进入“Application Status”页面。
+2.  **Open the Tool**: Click the **Shield Icon** extension.
+    *   点击插件图标打开窗口。
+3.  **Scan**: Click the blue **"Scan Current Tab"** button.
+    *   点击蓝色的 **"Scan Current Tab"** 按钮。
+4.  **Analyze / 查看结果**:
+    *   **Recon Guide**: Shows you exactly which number to call if not approved. (显示具体的后门电话)
+    *   **Reference #**: The key ID to quote to the agent. (告诉客服这个 Reference ID)
+    *   **Error Codes**: Detailed internal rejection/pending reasons. (详细的内部错误代码)
 
 ---
 
-## ⚖️ Disclaimer
+## 🔒 Privacy / 隐私声明
+This tool runs **100% locally** in your browser. No data is sent to us or any third-party servers.  
+本工具 **100% 本地运行**。您的任何数据都不会发送给我们或第三方服务器。
 
-This software is an unofficial tool built by the community for educational and informational purposes only.
-*   It is **not** affiliated with, endorsed by, or connected to JPMorgan Chase & Co.
-*   Use at your own risk.
-*   Always protect your personal financial information.
+---
+
+## ⚖️ Disclaimer / 免责声明
+This is an unofficial tool for educational purposes only. Not affiliated with JPMorgan Chase & Co.  
+本项目为社区开发的非官方工具，仅供学习交流。与 JPMorgan Chase & Co. 无任何关联。

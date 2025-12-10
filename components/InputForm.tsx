@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ChaseApplicationData } from '../types';
-import { AlertCircle, Code, PlayCircle, Search, Loader2 } from 'lucide-react';
+import { AlertCircle, Code, Search, Loader2 } from 'lucide-react';
 
 // Declare chrome global to fix TypeScript errors if @types/chrome is missing
 declare var chrome: any;
@@ -47,7 +47,6 @@ export const InputForm: React.FC<InputFormProps> = ({ onDataParsed }) => {
   const [scanning, setScanning] = useState(false);
 
   useEffect(() => {
-    // Check if running as a Chrome Extension
     if (typeof chrome !== 'undefined' && chrome.tabs && chrome.scripting) {
       setIsExtension(true);
     }
@@ -56,12 +55,12 @@ export const InputForm: React.FC<InputFormProps> = ({ onDataParsed }) => {
   const handleParse = () => {
     try {
       if (!input.trim()) {
-        setError('Please paste the JSON content first.');
+        setError('Please paste JSON first.');
         return;
       }
       const parsed = JSON.parse(input);
       if (!parsed.cardAccountStatus && !parsed.productApplicationIdentifier) {
-        throw new Error("JSON does not look like a valid Chase application status response.");
+        throw new Error("Invalid JSON data.");
       }
       onDataParsed(parsed as ChaseApplicationData);
       setError(null);
@@ -80,53 +79,35 @@ export const InputForm: React.FC<InputFormProps> = ({ onDataParsed }) => {
 
     try {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      
-      if (!tab.id) throw new Error("No active tab found");
-      
+      if (!tab.id) throw new Error("No active tab.");
       if (!tab.url?.includes("chase.com")) {
-        throw new Error("Please navigate to the Chase Application Status page first.");
+        throw new Error("Go to Chase Application Status page first.");
       }
 
-      // Execute script in the active tab
       const results = await chrome.scripting.executeScript({
         target: { tabId: tab.id },
         func: async () => {
-          // Look for the specific API call in the performance logs
           const entries = performance.getEntries();
-          // The API usually contains /originations/ or /applications/ and /status
           const statusEntry = entries.find(e => 
             e.name.includes("/applications/") && e.name.includes("/status")
           );
 
-          if (!statusEntry) {
-            throw new Error("Status API call not found in network logs. Please refresh the page and wait for the status to load.");
-          }
+          if (!statusEntry) throw new Error("Status API not found. Refresh page.");
 
-          // Re-fetch the data using the current session
           const response = await fetch(statusEntry.name);
           if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
           return await response.json();
         }
       });
 
-      // Handle the result from the injected script
       if (results && results[0] && results[0].result) {
-        const data = results[0].result;
-        // Verify structure
-        if (!data.cardAccountStatus && !data.productApplicationIdentifier) {
-           throw new Error("Retrieved data is not a valid Application Status object.");
-        }
-        onDataParsed(data);
+        onDataParsed(results[0].result);
       } else {
-        // Checking if an error was thrown inside the script (results usually handle return values)
-        // If the script threw an error, executeScript might not catch it cleanly in the result array depending on chrome version
-        throw new Error("Failed to retrieve data. Ensure you are on the Application Status page.");
+        throw new Error("Failed to retrieve data.");
       }
 
     } catch (err: any) {
-      // Clean up error message from chrome injection structure
-      const msg = err.message || "Unknown error occurred";
-      // Remove "Error: " prefix if present from the injected script error
+      const msg = err.message || "Unknown error";
       setError(msg.replace('Error: ', ''));
     } finally {
       setScanning(false);
@@ -134,87 +115,70 @@ export const InputForm: React.FC<InputFormProps> = ({ onDataParsed }) => {
   };
 
   return (
-    <div className="bg-white shadow-xl rounded-2xl overflow-hidden max-w-3xl mx-auto border border-gray-100">
-      <div className="bg-gradient-to-r from-chase-navy to-chase-blue p-6 text-white">
-        <h2 className="text-2xl font-bold flex items-center gap-2">
-            <Code className="w-6 h-6" />
-            Chase Status Viewer
+    <div className="bg-white shadow-lg rounded-xl overflow-hidden border border-gray-100">
+      <div className="bg-gradient-to-r from-chase-navy to-chase-blue p-4 text-white">
+        <h2 className="text-lg font-bold flex items-center gap-2">
+            <Code className="w-5 h-5" />
+            Check Status
         </h2>
-        <p className="opacity-90 mt-2 text-sm">
+        <p className="opacity-90 mt-1 text-xs">
             {isExtension 
-              ? "Scan your current tab or paste the JSON manually." 
-              : "Paste the JSON response from the Chase network logs."}
+              ? "Scan current tab or paste JSON." 
+              : "Paste JSON from network logs."}
         </p>
       </div>
 
-      <div className="p-6 space-y-6">
-        
-        {/* Chrome Extension Auto-Scan Button */}
+      <div className="p-4 space-y-4">
         {isExtension && (
-            <div className="bg-blue-50 border border-blue-100 rounded-xl p-5 text-center">
-                <h3 className="text-blue-900 font-semibold mb-2">Automatic Detection</h3>
-                <p className="text-sm text-blue-700 mb-4">
-                    Navigate to the Chase Application Status page, wait for it to load, then click below.
-                </p>
+            <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 text-center">
                 <button
                     onClick={handleScanTab}
                     disabled={scanning}
-                    className="w-full sm:w-auto px-6 py-3 bg-chase-blue text-white rounded-lg font-semibold shadow-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 mx-auto"
+                    className="w-full py-2 bg-chase-blue text-white rounded-md font-semibold text-sm shadow hover:bg-blue-700 disabled:opacity-70 transition-all flex items-center justify-center gap-2"
                 >
-                    {scanning ? (
-                        <>
-                            <Loader2 className="w-5 h-5 animate-spin" />
-                            Scanning Page...
-                        </>
-                    ) : (
-                        <>
-                            <Search className="w-5 h-5" />
-                            Scan Current Tab
-                        </>
-                    )}
+                    {scanning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+                    {scanning ? "Scanning..." : "Scan Current Tab"}
                 </button>
+                <p className="text-[10px] text-blue-600 mt-2">
+                    Open Chase App Status page first.
+                </p>
             </div>
         )}
 
-        {/* Manual Input */}
         <div>
             <div className="flex items-center gap-2 mb-2">
                 <div className="h-px bg-gray-200 flex-grow"></div>
-                <span className="text-xs font-bold text-gray-400 uppercase">Or Paste JSON Manually</span>
+                <span className="text-[10px] font-bold text-gray-400 uppercase">Or Manual Input</span>
                 <div className="h-px bg-gray-200 flex-grow"></div>
             </div>
 
             <textarea
-                className="w-full h-32 p-4 font-mono text-sm bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-chase-blue focus:border-transparent outline-none transition-all placeholder:text-gray-400"
-                placeholder='Paste JSON here... {"productApplicationIdentifier": "..."}'
+                className="w-full h-20 p-2 font-mono text-xs bg-gray-50 border border-gray-300 rounded focus:ring-1 focus:ring-chase-blue outline-none placeholder:text-gray-400"
+                placeholder='Paste JSON here...'
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
             />
         </div>
 
         {error && (
-          <div className="p-4 bg-red-50 border-l-4 border-red-500 text-red-700 flex items-start gap-3 rounded-r animate-in slide-in-from-top-2">
-            <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
-            <div>
-                <p className="font-bold">Error</p>
-                <p className="text-sm">{error}</p>
-            </div>
+          <div className="p-2 bg-red-50 border-l-2 border-red-500 text-red-700 text-xs flex gap-2 rounded-r">
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <div>{error}</div>
           </div>
         )}
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-between items-center pt-2">
+        <div className="flex gap-2 justify-end pt-1">
             <button
                 onClick={loadDemo}
-                className="text-gray-500 hover:text-chase-blue text-sm font-medium hover:underline transition-colors"
+                className="text-gray-400 hover:text-chase-blue text-xs font-medium hover:underline px-2"
             >
-                Load Demo Data
+                Demo
             </button>
             <button
                 onClick={handleParse}
-                className="w-full sm:w-auto px-8 py-3 bg-gray-800 text-white rounded-lg font-semibold shadow hover:bg-gray-700 transition-all flex items-center justify-center gap-2"
+                className="px-4 py-2 bg-gray-800 text-white rounded-md text-xs font-semibold hover:bg-gray-700"
             >
-                <PlayCircle className="w-5 h-5" />
-                Parse Text
+                Parse Data
             </button>
         </div>
       </div>
