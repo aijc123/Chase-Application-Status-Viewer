@@ -14,7 +14,7 @@
 
 ### 1. Download / 下载
 Go to the **[Releases Page](../../releases)**.  
-Download the file named **`chase-status-viewer.zip`** (Look for v1.0.2 or higher).
+Download the file named **`chase-status-viewer.zip`** .
 
 前往 **[Releases 页面](../../releases)**，下载名为 **`chase-status-viewer.zip`** 的文件 (找 v1.0.2 或更高版本)。
 
