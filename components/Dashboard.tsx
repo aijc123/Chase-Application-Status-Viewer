@@ -11,8 +11,6 @@ interface DashboardProps {
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({ data, onReset }) => {
-  // Usually the array has one active application status, we'll take the first one or map all if multiple.
-  // For this specific use case, we usually see one card status object.
   const mainStatus = data.cardAccountStatus?.[0];
 
   if (!mainStatus) {
