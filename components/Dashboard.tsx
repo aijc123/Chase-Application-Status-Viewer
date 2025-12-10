@@ -44,7 +44,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, onReset }) => {
           label="Application Status"
           value={mainStatus.productApplicationStatusCode}
           highlight
-          subValue={mainStatus.straightThroughEligibilityIndicator === false ? "Straight Through: False" : undefined}
+          subValue={mainStatus.statusAdditionalInformation?.straightThroughEligibilityIndicator === false ? "Straight Through: False" : undefined}
           tooltip="This is the internal status code. 'PEND_CALL_SUPPORT' usually indicates a need for recon."
         />
         <InfoCard
