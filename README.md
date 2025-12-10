@@ -1,49 +1,69 @@
-# Chase Application Status Viewer (Unofficial)
+# Chase Application Status Viewer 🛡️
 
-A secure, client-side tool to visualize the hidden JSON status details of your Chase Credit Card applications. This tool helps identify rejection reasons, recon reference numbers, and status timestamps that aren't visible on the main webpage.
+![Version](https://img.shields.io/github/v/release/YOUR_USERNAME/Chase-Application-Status-Viewer?label=Latest%20Version)
+![License](https://img.shields.io/badge/license-MIT-blue)
 
-## Features
+An unofficial browser extension that reveals the **hidden details** of your Chase Credit Card application status. It helps you find the specific "Decision Engine" codes and reference numbers needed when calling the reconsideration line (Recon).
 
-- **One-Click Scan**: Automatically detects application status JSON from your active Chase tab.
-- **Detailed Insights**: Decodes internal status codes (e.g., `PEND_CALL_SUPPORT`).
-- **Recon Helpers**: Shows Decision Engine Reference IDs and specific error codes for calling reconsideration lines.
-- **Privacy First**: Runs 100% locally in your browser. No data is sent to any analytics or 3rd party server.
-- **Persistence**: Remembers your last scanned status even if you close the extension popup.
+**🔒 Privacy First:** This tool runs 100% locally in your browser. No data is sent to any external server.
 
-## Installation (Chrome/Edge/Brave)
+---
 
-Since this is a developer tool, you can install it manually:
+## 📥 How to Install (For Everyone)
 
-1.  **Download & Build**:
-    *   Clone this repository.
-    *   Run `npm install` then `npm run build`.
-    *   This creates a `dist` folder.
+You do **not** need to be a developer to use this.
 
-2.  **Load into Chrome**:
-    *   Open Chrome and navigate to `chrome://extensions`.
-    *   Enable **Developer mode** (toggle in the top-right corner).
-    *   Click the **Load unpacked** button.
-    *   Select the `dist` folder you just created.
+### 1. Download
+Go to the **[Releases Page](../../releases/latest)** and download the file named **`chase-status-viewer.zip`**.
 
-3.  **Usage**:
-    *   Log in to your Chase account and go to the "Application Status" page.
-    *   Click the **Shield Icon** in your browser toolbar.
-    *   Click **"Scan Current Tab"**.
+### 2. Unzip
+Locate the downloaded file and **unzip/extract it**. You should now have a folder (usually named `dist` or `chase-status-viewer`) containing files like `index.html` and `manifest.json`.
 
-## Manual Usage (Web Version)
+### 3. Load into Chrome / Edge / Brave
+1. Open your browser and type `chrome://extensions` in the address bar.
+2. In the top-right corner, turn on the toggle switch for **Developer mode**.
+3. Click the button that says **Load unpacked**.
+4. Select the folder you just unzipped in Step 2.
 
-If you prefer not to install the extension:
-1.  Open the web version (or run locally via `npm run dev`).
-2.  On Chase.com, press `F12` to open Developer Tools.
-3.  Go to the **Network** tab.
-4.  Filter by `status`.
-5.  Refresh the page.
-6.  Click the request that looks like `.../applications/{UUID}/status`.
-7.  Copy the **Response** JSON.
-8.  Paste it into the viewer.
+*Done! The shield icon should appear in your toolbar.*
 
-## Privacy Policy
+---
 
-This software is open source. It does not collect, store, or transmit any personal information. All processing happens within your browser instance.
+## 🚀 How to Use
 
-**Disclaimer**: This is an unofficial tool built by the community. It is not affiliated with, endorsed by, or connected to JPMorgan Chase & Co. Use at your own risk.
+1. **Login to Chase**: Go to [Chase.com](https://www.chase.com) and navigate to the "Application Status" page (usually under the main menu > "Application Status").
+2. **Open the Tool**: Click the **Shield Icon** extension in your browser toolbar.
+3. **Scan**: Click the blue **"Scan Current Tab"** button.
+4. **Analyze**:
+   *   **Recon Guide**: If rejected or pending, see exactly which number to call.
+   *   **Reference #**: Copy the Decision Engine Reference Identifier to quote to the agent.
+   *   **Error Codes**: See detailed internal error codes (e.g., `PEND_CALL_SUPPORT` vs `DECLINED`).
+
+---
+
+## 🛠️ For Developers (Manual Build)
+
+If you want to modify the code or build it yourself:
+
+1.  Clone the repo:
+    ```bash
+    git clone https://github.com/YOUR_USERNAME/Chase-Application-Status-Viewer.git
+    ```
+2.  Install dependencies:
+    ```bash
+    npm install
+    ```
+3.  Build:
+    ```bash
+    npm run build
+    ```
+4.  Load the `dist` folder into Chrome as an unpacked extension.
+
+---
+
+## ⚖️ Disclaimer
+
+This software is an unofficial tool built by the community for educational and informational purposes only.
+*   It is **not** affiliated with, endorsed by, or connected to JPMorgan Chase & Co.
+*   Use at your own risk.
+*   Always protect your personal financial information.
