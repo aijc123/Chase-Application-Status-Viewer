@@ -1,6 +1,6 @@
 import React from 'react';
-import { ChaseApplicationData, CardAccountStatus } from '../types';
-import { ArrowLeft, RefreshCw } from 'lucide-react';
+import { ChaseApplicationData } from '../types';
+import { ArrowLeft } from 'lucide-react';
 import { InfoCard } from './InfoCard';
 import { DocumentStatus } from './DocumentStatus';
 import { RawViewer } from './RawViewer';

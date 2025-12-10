@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ChaseApplicationData } from '../types';
-import { AlertCircle, Code, PlayCircle, Radio, Search, CheckCircle2, Loader2 } from 'lucide-react';
+import { AlertCircle, Code, PlayCircle, Search, Loader2 } from 'lucide-react';
 
 // Declare chrome global to fix TypeScript errors if @types/chrome is missing
 declare var chrome: any;
