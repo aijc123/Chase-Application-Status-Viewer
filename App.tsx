@@ -55,20 +55,20 @@ const App: React.FC = () => {
   };
 
   if (loading) {
-      return <div className="h-screen flex items-center justify-center bg-gray-50 text-gray-400 text-sm">Loading...</div>;
+      return <div className="h-full flex items-center justify-center bg-gray-50 text-gray-400 text-sm">Loading...</div>;
   }
 
   return (
-    <div className="min-h-screen flex flex-col font-sans">
-      {/* Header - Made Compact (h-12 instead of h-16) */}
+    <div className="min-h-full flex flex-col font-sans text-sm">
+      {/* Header - Made Compact (h-10) */}
       <header className="bg-chase-navy text-white shadow-md sticky top-0 z-50">
-        <div className="px-4 h-12 flex items-center justify-between">
+        <div className="px-3 h-10 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <ShieldCheck className="h-6 w-6 text-chase-blue bg-white rounded-full p-0.5" />
-            <h1 className="text-base font-bold tracking-tight">Chase Status</h1>
+            <ShieldCheck className="h-5 w-5 text-chase-blue bg-white rounded-full p-0.5" />
+            <h1 className="text-sm font-bold tracking-tight">Chase Status</h1>
           </div>
           <div className="text-[10px] text-gray-300">
-            v1.0.1
+            v1.0.2
           </div>
         </div>
       </header>
@@ -86,8 +86,8 @@ const App: React.FC = () => {
 
       {/* Footer - Made Compact */}
       <footer className="bg-white border-t border-gray-200 mt-auto">
-        <div className="px-4 py-2">
-          <p className="text-center text-[10px] text-gray-400 leading-tight">
+        <div className="px-3 py-1.5">
+          <p className="text-center text-[9px] text-gray-400 leading-tight">
             Unofficial tool. Runs locally. <br/>
             Not affiliated with JPMorgan Chase & Co.
           </p>

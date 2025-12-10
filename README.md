@@ -1,7 +1,6 @@
 # Chase Application Status Viewer / Chase 信用卡申请状态查看器 🛡️
 
-![Version](https://img.shields.io/github/v/release/YOUR_USERNAME/Chase-Application-Status-Viewer?label=Latest%20Version)
-![License](https://img.shields.io/badge/license-MIT-blue)
+**Current Version: v1.0.2**
 
 **English**: An unofficial browser extension that reveals the **hidden details** of your Chase Credit Card application status (Decision Engine codes, specific Recon numbers, and error details).  
 **中文**: 一个非官方的浏览器插件，用于查看 Chase 信用卡申请背后的**详细状态**（包括被拒原因代码、具体的后门电话 Recon Number 以及内部错误信息）。
@@ -10,13 +9,14 @@
 
 ## 📥 Installation / 安装方法
 
-No coding skills required. / 不需要懂代码。
+**Note**: If you have an older version installed, please remove it first or point to the new folder.  
+**注意**: 如果你之前安装过旧版本，请先移除，或者确保加载的是新解压的文件夹。
 
 ### 1. Download / 下载
-Go to the **[Releases Page](../../releases/latest)**.  
-Download the file named **`chase-status-viewer.zip`**.
+Go to the **[Releases Page](../../releases)**.  
+Download the file named **`chase-status-viewer.zip`** (Look for v1.0.2 or higher).
 
-前往 **[Releases 页面](../../releases/latest)**，下载名为 **`chase-status-viewer.zip`** 的文件。
+前往 **[Releases 页面](../../releases)**，下载名为 **`chase-status-viewer.zip`** 的文件 (找 v1.0.2 或更高版本)。
 
 ### 2. Unzip / 解压
 **Unzip/Extract** the downloaded file. You should see a folder containing `manifest.json`.  
@@ -36,6 +36,18 @@ Download the file named **`chase-status-viewer.zip`**.
 
 *🎉 Done! Click the shield icon in your toolbar to start.*  
 *🎉 完成！点击浏览器右上角的盾牌图标即可使用。*
+
+---
+
+## ❓ Troubleshooting / 常见问题
+
+**Q: It still shows version 1.0.0? / 为什么显示的还是 1.0.0 版本？**
+A: You likely loaded the old folder. Make sure you downloaded the new zip, unzipped it to a **new** location, and selected **that new folder** in Chrome.
+A: 你可能加载了旧的文件夹。请确保下载了最新的压缩包，解压到一个**新位置**，然后在 Chrome 里选择那个**新文件夹**。
+
+**Q: The window is too big? / 窗口太大了？**
+A: Update to v1.0.2. We have reduced the size significantly (380px width).
+A: 请更新到 v1.0.2，我们已经显著缩小了窗口尺寸 (380px)。
 
 ---
 
