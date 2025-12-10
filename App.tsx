@@ -68,7 +68,7 @@ const App: React.FC = () => {
             <h1 className="text-base font-bold tracking-tight">Chase Status</h1>
           </div>
           <div className="text-[10px] text-gray-300">
-            v1.0.0
+            v1.0.1
           </div>
         </div>
       </header>
