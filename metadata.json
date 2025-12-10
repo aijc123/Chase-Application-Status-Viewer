@@ -1,0 +1,5 @@
+{
+  "name": "Copy of Chase App Status Viewer",
+  "description": "A tool to visualize Chase Credit Card application status JSON data for reconsideration calls.",
+  "requestFramePermissions": []
+}
