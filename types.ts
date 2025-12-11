@@ -17,17 +17,21 @@ export interface StatusAdditionalInformation {
   requiredActionList?: string[];
 }
 
-export interface CardAccountStatus {
+export interface GenericAccountStatus {
+    productCode: string;
+    subProductCode: string;
+    productApplicationStatusCode: string;
+    statusAdditionalInformation?: StatusAdditionalInformation;
+    pendRequiredInformation?: PendRequiredInformation;
+    productApplicationStatusChangeTimestamp: string;
+    decisionEngineReferenceIdentifier?: string;
+    acquisitionSourceName?: string;
+    marketCellIdentifier?: string;
+}
+
+// Specific interface for Cards (080)
+export interface CardAccountStatus extends GenericAccountStatus {
   capturedApplicationIdentifier: string;
-  productCode: string;
-  subProductCode: string;
-  acquisitionSourceName?: string;
-  marketCellIdentifier?: string;
-  productApplicationStatusCode: string;
-  statusAdditionalInformation?: StatusAdditionalInformation;
-  pendRequiredInformation?: PendRequiredInformation;
-  productApplicationStatusChangeTimestamp: string;
-  decisionEngineReferenceIdentifier?: string;
   secureMailInteractionIdentifier?: string;
   linkExpirationDate?: string;
 }
@@ -35,7 +39,14 @@ export interface CardAccountStatus {
 export interface ChaseApplicationData {
   productApplicationIdentifier: string;
   customerFacingApplicationIdentifier?: string;
-  cardAccountStatus: CardAccountStatus[];
+  // Credit Cards
+  cardAccountStatus?: CardAccountStatus[];
+  // Checking/Savings (Product Code 919 etc)
+  enrollmentProductStatus?: GenericAccountStatus[]; 
+  depositAccountStatus?: GenericAccountStatus[];
+  lendingAccountStatus?: GenericAccountStatus[];
+  investmentAccountStatus?: GenericAccountStatus[];
+  
   applicationSubmitTimestamp?: string;
   applicationCreateTimestamp?: string;
   applicationLastUpdateTimestamp?: string;
