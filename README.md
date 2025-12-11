@@ -1,6 +1,6 @@
 # Chase Application Status Viewer / Chase 信用卡申请状态查看器 🛡️
 
-**Current Version: v1.0.2**
+**Current Version: v1.0.3**
 
 **English**: An unofficial browser extension that reveals the **hidden details** of your Chase Credit Card application status. It replaces the need for complex packet capture tools.  
 **中文**: 一个非官方的浏览器插件，用于查看 Chase 信用卡申请背后的**详细状态**。它能帮你提取网页上不显示的详细拒信原因、补材料要求和内部状态代码，替代复杂的抓包软件。
@@ -27,7 +27,7 @@
 
 ### 1. Download / 下载
 Go to the **[Releases Page](../../releases)**.  
-Download the file named **`chase-status-viewer.zip`** (Look for v1.0.2 or higher).
+Download the file named **`chase-status-viewer.zip`** (Look for v1.0.3 or higher).
 
 前往 **[Releases 页面](../../releases)**，下载名为 **`chase-status-viewer.zip`** 的文件。
 
