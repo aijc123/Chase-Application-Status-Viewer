@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ChaseApplicationData } from '../types';
-import { AlertCircle, Code, Search, Loader2, RefreshCw, HelpCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { AlertCircle, Code, Search, Loader2, RefreshCw, HelpCircle, ChevronDown, ChevronUp, Zap } from 'lucide-react';
 
 // Declare chrome global
 declare var chrome: any;
@@ -76,55 +76,76 @@ export const InputForm: React.FC<InputFormProps> = ({ onDataParsed }) => {
         target: { tabId: tab.id },
         func: async () => {
           try {
-            // Find network resources (Fetch/XHR) that match status API patterns
-            // Use getEntriesByType("resource") to avoid matching the navigation entry (the HTML page itself)
+             // --- Strategy 1: Smart Log Scan (Most Accurate) ---
+             // We first look for the EXACT URL the page used.
             const entries = performance.getEntriesByType("resource");
-            
             const statusEntry = entries.reverse().find(e => {
-              // Strictly look for API-like patterns
               // Typical Chase Status APIs: 
               // .../v1/applications/status
               // .../v2/applications/status
               // .../applications/{UUID}/status
               const isStatusApi = (e.name.includes("/applications/") && e.name.includes("/status")) ||
                                   e.name.includes("app-status-api") ||
-                                  e.name.includes("application/status"); // Fallback for some legacy
+                                  e.name.includes("application/status");
               
-              // Explicitly exclude the HTML page route to prevent parsing HTML as JSON
+              // Exclude the HTML page itself
               const isPageRoute = e.name.includes("originations/myApplications") || e.name.includes("cfgCode=AOSTATUS");
 
               return isStatusApi && !isPageRoute;
             });
 
-            if (!statusEntry) {
-                return { error: "NOT_FOUND" };
-            }
-
-            // Attempt to re-fetch with mimic headers
-            // Default to 'ci' channel if window.channel is not accessible in isolated world
-            const channel = 'ci'; 
+            // Common headers needed for Chase APIs
             const headers = {
                 'x-jpmc-csrf-token': 'NONE',
-                'x-jpmc-channel': `id=${channel}`,
+                'x-jpmc-channel': 'id=ci',
                 'Accept': 'application/json'
             };
 
-            const response = await fetch(statusEntry.name, {
-                method: 'GET',
-                headers: headers
-            });
+            // If we found a specific URL in logs, try that first
+            if (statusEntry) {
+                try {
+                    const response = await fetch(statusEntry.name, { method: 'GET', headers: headers });
+                    if (response.ok) {
+                        const json = await response.json();
+                        return { result: json, method: 'Log Scan' };
+                    }
+                } catch(e) {
+                    console.log("Log scan fetch failed, trying fallback...");
+                }
+            }
 
-            if (!response.ok) {
-                return { error: `HTTP_${response.status}` };
+            // --- Strategy 2: Blind Fetch (Fallback) ---
+            // If log is empty (user didn't refresh), try common known endpoints directly.
+            // This enables "One-Step" scanning without refresh in many cases.
+            const commonEndpoints = [
+                '/origination-api/v3/applications/status',
+                '/origination-api/v2/applications/status',
+                '/origination-api/v1/applications/status',
+                '/origination-api/v4/applications/status' // Future proofing
+            ];
+
+            for (const endpoint of commonEndpoints) {
+                try {
+                    // We use relative paths, so it fetches against the current domain (e.g. creditcards.chase.com)
+                    const response = await fetch(endpoint, { method: 'GET', headers: headers });
+                    if (response.ok) {
+                        const text = await response.text();
+                        try {
+                             const json = JSON.parse(text);
+                             // Basic validation to ensure it's not an HTML error page
+                             if (Array.isArray(json) || (json && json.productApplicationIdentifier)) {
+                                 return { result: json, method: 'Direct Fetch' };
+                             }
+                        } catch(e) {}
+                    }
+                } catch (e) {
+                    // Continue to next endpoint
+                }
             }
-            
-            const text = await response.text();
-            try {
-                const json = JSON.parse(text);
-                return { result: json };
-            } catch (e) {
-                return { error: "Response was not JSON. Likely grabbed wrong URL." };
-            }
+
+            // If both strategies fail
+            return { error: "NOT_FOUND" };
+
           } catch (e: any) {
             return { error: e.message || "Script Error" };
           }
@@ -151,11 +172,10 @@ export const InputForm: React.FC<InputFormProps> = ({ onDataParsed }) => {
     } catch (err: any) {
       const msg = err.message || "Unknown error";
       if (msg.includes("NOT_FOUND")) {
-          // Providing extremely specific instruction based on user feedback
-          setError("Scan failed: Network Log Empty. You MUST Refresh the page (F5) once, wait for loading to finish, then click Scan.");
+          setError("Could not find status data automatically. Please Refresh page (F5) and try again.");
           setShowGuide(true); 
       } else {
-          setError(`Scan failed: ${msg.replace('Error: ', '')}. Please Refresh & Try again, or use Manual Mode.`);
+          setError(`Scan failed: ${msg.replace('Error: ', '')}. Please Refresh & Try again.`);
           setShowGuide(true);
       }
     } finally {
@@ -172,7 +192,7 @@ export const InputForm: React.FC<InputFormProps> = ({ onDataParsed }) => {
         </h2>
         <p className="opacity-90 mt-1 text-[10px] leading-tight">
             {isExtension 
-              ? "Use on 'Application Status' page. Refresh page before scanning." 
+              ? "Use on 'Application Status' page." 
               : "Paste JSON from network logs."}
         </p>
       </div>
@@ -185,11 +205,11 @@ export const InputForm: React.FC<InputFormProps> = ({ onDataParsed }) => {
                     disabled={scanning}
                     className="w-full py-2.5 bg-chase-blue text-white rounded-md font-semibold text-sm shadow hover:bg-blue-700 disabled:opacity-70 transition-all flex items-center justify-center gap-2"
                 >
-                    {scanning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
-                    {scanning ? "Scanning..." : "Scan Current Tab"}
+                    {scanning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4 fill-current" />}
+                    {scanning ? "Scanning..." : "One-Click Scan"}
                 </button>
                 <div className="flex gap-2 justify-center text-[10px] text-blue-700">
-                   <span className="flex items-center gap-1"><RefreshCw className="w-3 h-3"/> If failed, Refresh page & Scan again</span>
+                   <span className="flex items-center gap-1 opacity-80">Auto-detects API endpoints</span>
                 </div>
             </div>
         )}
