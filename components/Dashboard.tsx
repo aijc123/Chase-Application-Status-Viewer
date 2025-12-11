@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { ChaseApplicationData, GenericAccountStatus } from '../types';
-import { ArrowLeft, Phone, ShieldAlert, CheckCircle2, ChevronRight, CreditCard, Banknote, Filter } from 'lucide-react';
+import { ArrowLeft, Phone, ShieldAlert, CheckCircle2, ChevronRight, CreditCard, Banknote, Filter, Car, TrendingUp } from 'lucide-react';
 import { InfoCard } from './InfoCard';
 import { DocumentStatus } from './DocumentStatus';
 import { RawViewer } from './RawViewer';
@@ -91,6 +91,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, onReset }) => {
                       const originalIndex = data.indexOf(app);
                       const statusObj = getPrimaryStatus(app);
                       const statusInfo = getStatusInfo(statusObj?.productApplicationStatusCode);
+                      const productInfo = getProductInfo(app, statusObj);
+                      const Icon = productInfo.icon;
                       
                       return (
                         <div 
@@ -100,11 +102,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, onReset }) => {
                         >
                             <div className="flex items-start gap-3">
                                 <div className={`p-2 rounded-full ${statusInfo.sentiment === 'error' ? 'bg-red-100 text-red-600' : 'bg-blue-50 text-chase-blue'}`}>
-                                    {app.cardAccountStatus ? <CreditCard className="w-5 h-5"/> : <Banknote className="w-5 h-5"/>}
+                                    <Icon className="w-5 h-5"/>
                                 </div>
                                 <div>
                                     <h3 className="text-sm font-bold text-gray-800">
-                                        {app.cardAccountStatus ? 'Credit Card' : 'Bank Account'}
+                                        {productInfo.label}
                                     </h3>
                                     <p className="text-xs text-gray-500 font-mono mt-0.5">
                                         Code: {statusObj?.productCode}-{statusObj?.subProductCode}
@@ -134,6 +136,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, onReset }) => {
 
   const statusDef = getStatusInfo(mainStatus.productApplicationStatusCode);
   const isActionable = statusDef.sentiment === 'warning' || statusDef.sentiment === 'error';
+  const productInfo = getProductInfo(appData, mainStatus);
 
   return (
     <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300 pb-4">
@@ -241,7 +244,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, onReset }) => {
       <div className="bg-white border border-gray-200 rounded-lg p-3">
         <h3 className="text-[10px] font-bold text-gray-400 uppercase mb-2">Details</h3>
         <div className="space-y-1 text-xs">
-            <MetaRow label="Product Type" value={appData.cardAccountStatus ? 'Credit Card' : 'Bank/Deposit'} />
+            <MetaRow label="Product Type" value={productInfo.label} />
             <MetaRow label="Product Code" value={`${mainStatus.productCode} (${mainStatus.subProductCode})`} />
             <MetaRow label="Source" value={mainStatus.acquisitionSourceName || '-'} />
             <MetaRow label="App ID" value={appData.productApplicationIdentifier} truncate />
@@ -253,6 +256,37 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, onReset }) => {
     </div>
   );
 };
+
+// Helper to determine product type label and icon
+// NOW PRIORITY: Product Code (080 vs 919) -> Fallback to Array Keys
+function getProductInfo(app: ChaseApplicationData, status?: GenericAccountStatus) {
+    const code = status?.productCode || '';
+    
+    // Priority 1: Check Explicit Product Codes
+    if (code.startsWith('080')) {
+        return { label: 'Credit Card', icon: CreditCard };
+    }
+    if (code.startsWith('9')) { // 919, 980, etc
+        return { label: 'Bank Account', icon: Banknote };
+    }
+    if (code.startsWith('7')) { // 7xx is often Auto/Loans
+        return { label: 'Loan', icon: Car };
+    }
+
+    // Priority 2: Check JSON Structure (which array it came from)
+    if (app.cardAccountStatus) {
+        return { label: 'Credit Card', icon: CreditCard };
+    }
+    if (app.lendingAccountStatus) {
+        return { label: 'Loan / Mortgage', icon: Car };
+    }
+    if (app.investmentAccountStatus) {
+        return { label: 'Investment', icon: TrendingUp };
+    }
+    
+    // Default fallback
+    return { label: 'Bank Account', icon: Banknote };
+}
 
 // Helper to extract the most relevant status object from the application wrapper
 function getPrimaryStatus(app: ChaseApplicationData): GenericAccountStatus | undefined {

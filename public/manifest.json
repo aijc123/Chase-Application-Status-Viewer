@@ -18,7 +18,8 @@
     "storage"
   ],
   "host_permissions": [
-    "https://*.chase.com/*"
+    "https://*.chase.com/*",
+    "https://api.github.com/*"
   ],
   "icons": {
     "16": "vite.svg",

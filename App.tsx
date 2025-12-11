@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ChaseApplicationData } from './types';
 import { InputForm } from './components/InputForm';
 import { Dashboard } from './components/Dashboard';
+import { UpdateBanner } from './components/UpdateBanner';
 import { ShieldCheck } from 'lucide-react';
 
 // Declare chrome API
@@ -73,6 +74,9 @@ const App: React.FC = () => {
           </div>
         </div>
       </header>
+      
+      {/* Update Notification */}
+      <UpdateBanner />
 
       {/* Main Content */}
       <main className="flex-grow bg-gray-50 p-3 overflow-y-auto">

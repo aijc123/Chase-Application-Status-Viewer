@@ -151,10 +151,11 @@ export const InputForm: React.FC<InputFormProps> = ({ onDataParsed }) => {
     } catch (err: any) {
       const msg = err.message || "Unknown error";
       if (msg.includes("NOT_FOUND")) {
-          setError("Status API not found in network log. Please Refresh the page (F5) and try again.");
+          // Providing extremely specific instruction based on user feedback
+          setError("Scan failed: Network Log Empty. You MUST Refresh the page (F5) once, wait for loading to finish, then click Scan.");
           setShowGuide(true); 
       } else {
-          setError(`Scan failed: ${msg.replace('Error: ', '')}. Try Manual Mode below.`);
+          setError(`Scan failed: ${msg.replace('Error: ', '')}. Please Refresh & Try again, or use Manual Mode.`);
           setShowGuide(true);
       }
     } finally {
