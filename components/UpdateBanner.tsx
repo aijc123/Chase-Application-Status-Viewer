@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Download, X, Sparkles } from 'lucide-react';
+import { getCurrentVersion } from '../version';
 
 // ⚠️ IMPORTANT: Change this to your actual GitHub "User/Repo"
 // Example: "lemo-cor/chase-status-viewer"
@@ -33,9 +34,7 @@ export const UpdateBanner: React.FC = () => {
 
       try {
         // 1. Get current version
-        const currentVersion = typeof chrome !== 'undefined' && chrome.runtime?.getManifest
-          ? chrome.runtime.getManifest().version
-          : '1.0.6'; // Fallback for dev
+        const currentVersion = getCurrentVersion();
 
         // 2. Fetch latest release from GitHub API
         const response = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases/latest`);

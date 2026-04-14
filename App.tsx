@@ -4,6 +4,7 @@ import { InputForm } from './components/InputForm';
 import { Dashboard } from './components/Dashboard';
 import { UpdateBanner } from './components/UpdateBanner';
 import { ShieldCheck } from 'lucide-react';
+import { getCurrentVersion } from './version';
 
 const App: React.FC = () => {
   // Now storing an Array of applications
@@ -67,7 +68,7 @@ const App: React.FC = () => {
             <h1 className="text-sm font-bold tracking-tight">Chase Status</h1>
           </div>
           <div className="text-[10px] text-gray-300">
-            v{typeof chrome !== 'undefined' && chrome.runtime?.getManifest ? chrome.runtime.getManifest().version : '1.0.4'}
+            v{getCurrentVersion()}
           </div>
         </div>
       </header>
