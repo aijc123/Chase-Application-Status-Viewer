@@ -64,18 +64,9 @@ npm run preview    # Serve dist/ → http://localhost:4173
 
 **Data persistence**: Parsed results are stored in `chrome.storage.local` (key: `chaseStatusDataArray`) so they survive popup close/reopen.
 
-## Known Issues (Pending Fixes)
+## Known Issues
 
-| Priority | Issue | Location |
-|---|---|---|
-| HIGH | No fetch timeout/abort — scan can hang forever | `InputForm.tsx:130` |
-| HIGH | React/lucide loaded from esm.sh CDN — supply chain risk | `index.html:8-18` |
-| MEDIUM | Clipboard API has no `.catch()` — silent failures | `InfoCard.tsx:20` |
-| MEDIUM | JSON validation accepts empty arrays, may crash render | `InputForm.tsx:42-50` |
-| MEDIUM | GitHub version check runs every popup open, no caching | `UpdateBanner.tsx:16` |
-| MEDIUM | `any` type overuse despite `@types/chrome` being installed | multiple files |
-| LOW | Invalid dates render as "Invalid Date" with no fallback | `Dashboard.tsx:318` |
-| LOW | Version string duplicated in source instead of read from package.json | `App.tsx:73` |
+None at this time. All issues from the initial code review have been resolved in v1.0.5.
 
 ## What NOT to Do
 
