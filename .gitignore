@@ -11,6 +11,7 @@ node_modules
 dist
 dist-ssr
 *.local
+chase-status-viewer.zip
 
 # Editor directories and files
 .vscode/*

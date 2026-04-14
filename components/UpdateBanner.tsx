@@ -35,7 +35,7 @@ export const UpdateBanner: React.FC = () => {
         // 1. Get current version
         const currentVersion = typeof chrome !== 'undefined' && chrome.runtime?.getManifest
           ? chrome.runtime.getManifest().version
-          : '1.0.4'; // Fallback for dev
+          : '1.0.5'; // Fallback for dev
 
         // 2. Fetch latest release from GitHub API
         const response = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases/latest`);
