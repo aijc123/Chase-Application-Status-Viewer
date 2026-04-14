@@ -1,10 +1,31 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Component } from 'react';
 import { ChaseApplicationData } from './types';
 import { InputForm } from './components/InputForm';
 import { Dashboard } from './components/Dashboard';
 import { UpdateBanner } from './components/UpdateBanner';
 import { ShieldCheck } from 'lucide-react';
 import { getCurrentVersion } from './version';
+
+class ErrorBoundary extends Component<{ children: React.ReactNode }, { hasError: boolean }> {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="h-full flex flex-col items-center justify-center bg-gray-50 p-6 text-center">
+          <ShieldCheck className="w-8 h-8 text-red-400 mb-3" />
+          <p className="text-sm font-semibold text-gray-700 mb-1">Something went wrong</p>
+          <p className="text-xs text-gray-400">Try closing and reopening the popup.</p>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 const App: React.FC = () => {
   // Now storing an Array of applications
@@ -59,6 +80,7 @@ const App: React.FC = () => {
   }
 
   return (
+    <ErrorBoundary>
     <div className="min-h-full flex flex-col font-sans text-sm">
       {/* Header - Compact */}
       <header className="bg-chase-navy text-white shadow-md sticky top-0 z-50">
@@ -97,6 +119,7 @@ const App: React.FC = () => {
         </div>
       </footer>
     </div>
+    </ErrorBoundary>
   );
 };
 

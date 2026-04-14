@@ -164,8 +164,24 @@ export const InputForm: React.FC<InputFormProps> = ({ onDataParsed }) => {
 
       if (scriptResult && scriptResult.result) {
         // Handle the result whether it's an array or object
-        let resData = scriptResult.result;
+        let resData: ChaseApplicationData[] = scriptResult.result;
         if (!Array.isArray(resData)) resData = [resData];
+
+        // Same validation as handleParse — require at least one non-empty status array
+        const isValid = resData.some(item =>
+          item.productApplicationIdentifier && (
+              (item.cardAccountStatus?.length ?? 0) > 0 ||
+              (item.enrollmentProductStatus?.length ?? 0) > 0 ||
+              (item.depositAccountStatus?.length ?? 0) > 0 ||
+              (item.lendingAccountStatus?.length ?? 0) > 0 ||
+              (item.investmentAccountStatus?.length ?? 0) > 0
+          )
+        );
+
+        if (!isValid) {
+          throw new Error("NOT_FOUND");
+        }
+
         onDataParsed(resData);
       } else if (scriptResult && scriptResult.error) {
          if (scriptResult.error === "NOT_FOUND") {

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { InfoCard } from '../../components/InfoCard';
+import { InfoCard } from '../components/InfoCard';
 
 describe('InfoCard', () => {
   it('renders label and value', () => {

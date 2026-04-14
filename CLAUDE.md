@@ -64,6 +64,14 @@ npm run preview    # Serve dist/ → http://localhost:4173
 
 **Data persistence**: Parsed results are stored in `chrome.storage.local` (key: `chaseStatusDataArray`) so they survive popup close/reopen.
 
+**Recent bug fixes**:
+- Added validation consistency between manual paste and One-Click Scan
+- Added React Error Boundary to prevent white-screen crashes
+- Fixed null safety issues in Dashboard (productApplicationIdentifier.slice)
+- Fixed getProductInfo empty array truthy bug
+- Fixed getTimeAgo negative time display
+- Extracted shared utility functions to `utils.ts` for code reuse and test reliability
+
 ## Known Issues
 
 None at this time. All issues from the initial code review have been resolved in v1.0.5.

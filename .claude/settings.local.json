@@ -3,7 +3,11 @@
     "allow": [
       "mcp__Claude_Preview__preview_start",
       "Bash(npm install:*)",
-      "Bash(gh pr create --title 'feat: Add dev server launch config and lock file' --body ':*)"
+      "Bash(gh pr create --title 'feat: Add dev server launch config and lock file' --body ':*)",
+      "Bash(xxd \"C:/Users/eric_ai/OneDrive/Code_Github/Chase-Application-Status-Viewer/.github/workflows/gh-pages.yml\")",
+      "Bash(npm run *)",
+      "Bash(git add *)",
+      "Bash(git commit *)"
     ]
   }
 }

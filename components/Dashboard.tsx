@@ -4,6 +4,7 @@ import { ArrowLeft, Phone, ShieldAlert, CheckCircle2, ChevronRight, CreditCard, 
 import { InfoCard } from './InfoCard';
 import { DocumentStatus } from './DocumentStatus';
 import { RawViewer } from './RawViewer';
+import { formatDate, getTimeAgo } from '../utils';
 
 interface DashboardProps {
   data: ChaseApplicationData[];
@@ -150,7 +151,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, onReset }) => {
           {data.length > 1 ? 'All Apps' : 'Back'}
         </button>
         <div className="text-[10px] text-gray-400">
-           ID: {appData.productApplicationIdentifier.slice(0, 8)}...
+           ID: {appData.productApplicationIdentifier?.slice(0, 8) || 'N/A'}
         </div>
       </div>
 
@@ -274,13 +275,13 @@ function getProductInfo(app: ChaseApplicationData, status?: GenericAccountStatus
     }
 
     // Priority 2: Check JSON Structure (which array it came from)
-    if (app.cardAccountStatus) {
+    if (app.cardAccountStatus?.length) {
         return { label: 'Credit Card', icon: CreditCard };
     }
-    if (app.lendingAccountStatus) {
+    if (app.lendingAccountStatus?.length) {
         return { label: 'Loan / Mortgage', icon: Car };
     }
-    if (app.investmentAccountStatus) {
+    if (app.investmentAccountStatus?.length) {
         return { label: 'Investment', icon: TrendingUp };
     }
     
@@ -313,23 +314,3 @@ const MetaRow: React.FC<{ label: string; value: string; truncate?: boolean }> = 
     </div>
 );
 
-function formatDate(isoString?: string) {
-    if (!isoString) return 'N/A';
-    const d = new Date(isoString);
-    if (isNaN(d.getTime())) return 'N/A';
-    return d.toLocaleDateString(undefined, { month: 'numeric', day: 'numeric', year: '2-digit' });
-}
-
-function getTimeAgo(isoString?: string) {
-    if (!isoString) return '';
-    const d = new Date(isoString);
-    if (isNaN(d.getTime())) return '';
-    const diff = Date.now() - d.getTime();
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
-
-    if (days > 0) return `${days}d ago`;
-    if (hours > 0) return `${hours}h ago`;
-    return `${minutes}m ago`;
-}
