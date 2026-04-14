@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Download, X, Sparkles } from 'lucide-react';
 
-// Declare chrome global
-declare var chrome: any;
-
 // ⚠️ IMPORTANT: Change this to your actual GitHub "User/Repo"
 // Example: "lemo-cor/chase-status-viewer"
-const GITHUB_REPO = "YOUR_GITHUB_USER/YOUR_REPO_NAME"; 
+const GITHUB_REPO = "YOUR_GITHUB_USER/YOUR_REPO_NAME";
+
+const UPDATE_CACHE_KEY = 'chase_update_cache';
+const UPDATE_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
 
 export const UpdateBanner: React.FC = () => {
   const [updateInfo, setUpdateInfo] = useState<{ hasUpdate: boolean; version: string; url: string } | null>(null);
@@ -17,28 +17,43 @@ export const UpdateBanner: React.FC = () => {
       // Skip if generic placeholder is still there to avoid 404s
       if (GITHUB_REPO.includes("YOUR_GITHUB_USER")) return;
 
+      // Check cache first — avoid hitting GitHub API on every popup open
+      try {
+        const cached = localStorage.getItem(UPDATE_CACHE_KEY);
+        if (cached) {
+          const { timestamp, updateInfo: cachedInfo } = JSON.parse(cached);
+          if (Date.now() - timestamp < UPDATE_CACHE_TTL) {
+            if (cachedInfo) setUpdateInfo(cachedInfo);
+            return;
+          }
+        }
+      } catch {
+        // Ignore malformed cache
+      }
+
       try {
         // 1. Get current version
-        const currentVersion = typeof chrome !== 'undefined' && chrome.runtime?.getManifest 
-          ? chrome.runtime.getManifest().version 
+        const currentVersion = typeof chrome !== 'undefined' && chrome.runtime?.getManifest
+          ? chrome.runtime.getManifest().version
           : '1.0.4'; // Fallback for dev
 
         // 2. Fetch latest release from GitHub API
         const response = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases/latest`);
         if (!response.ok) return;
-        
+
         const data = await response.json();
         const latestVersionTag = data.tag_name; // e.g., "v1.0.4"
         const latestVersion = latestVersionTag.replace(/^v/, '');
-        
+
         // 3. Compare versions
-        if (compareVersions(latestVersion, currentVersion) > 0) {
-          setUpdateInfo({
-            hasUpdate: true,
-            version: latestVersion,
-            url: data.html_url // Link to the release page
-          });
-        }
+        const info = compareVersions(latestVersion, currentVersion) > 0
+          ? { hasUpdate: true, version: latestVersion, url: data.html_url }
+          : null;
+
+        // 4. Cache result for 24h
+        localStorage.setItem(UPDATE_CACHE_KEY, JSON.stringify({ timestamp: Date.now(), updateInfo: info }));
+
+        if (info) setUpdateInfo(info);
       } catch (e) {
         console.error("Failed to check for updates", e);
       }

@@ -2,9 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { ChaseApplicationData } from '../types';
 import { AlertCircle, Code, Search, Loader2, RefreshCw, HelpCircle, ChevronDown, ChevronUp, Zap } from 'lucide-react';
 
-// Declare chrome global
-declare var chrome: any;
-
 interface InputFormProps {
   onDataParsed: (data: ChaseApplicationData[]) => void;
 }
@@ -38,14 +35,14 @@ export const InputForm: React.FC<InputFormProps> = ({ onDataParsed }) => {
         dataToProcess = [parsed];
       }
 
-      // Validation
-      const isValid = dataToProcess.some(item => 
+      // Validation — require at least one non-empty status array
+      const isValid = dataToProcess.some(item =>
         item.productApplicationIdentifier && (
-            item.cardAccountStatus || 
-            item.enrollmentProductStatus || 
-            item.depositAccountStatus ||
-            item.lendingAccountStatus ||
-            item.investmentAccountStatus
+            (item.cardAccountStatus?.length ?? 0) > 0 ||
+            (item.enrollmentProductStatus?.length ?? 0) > 0 ||
+            (item.depositAccountStatus?.length ?? 0) > 0 ||
+            (item.lendingAccountStatus?.length ?? 0) > 0 ||
+            (item.investmentAccountStatus?.length ?? 0) > 0
         )
       );
 
@@ -101,10 +98,21 @@ export const InputForm: React.FC<InputFormProps> = ({ onDataParsed }) => {
                 'Accept': 'application/json'
             };
 
+            // Fetch helper with 8s timeout
+            const fetchWithTimeout = async (url: string, opts: RequestInit) => {
+                const controller = new AbortController();
+                const id = setTimeout(() => controller.abort(), 8000);
+                try {
+                    return await fetch(url, { ...opts, signal: controller.signal });
+                } finally {
+                    clearTimeout(id);
+                }
+            };
+
             // If we found a specific URL in logs, try that first
             if (statusEntry) {
                 try {
-                    const response = await fetch(statusEntry.name, { method: 'GET', headers: headers });
+                    const response = await fetchWithTimeout(statusEntry.name, { method: 'GET', headers });
                     if (response.ok) {
                         const json = await response.json();
                         return { result: json, method: 'Log Scan' };
@@ -127,7 +135,7 @@ export const InputForm: React.FC<InputFormProps> = ({ onDataParsed }) => {
             for (const endpoint of commonEndpoints) {
                 try {
                     // We use relative paths, so it fetches against the current domain (e.g. creditcards.chase.com)
-                    const response = await fetch(endpoint, { method: 'GET', headers: headers });
+                    const response = await fetchWithTimeout(endpoint, { method: 'GET', headers });
                     if (response.ok) {
                         const text = await response.text();
                         try {
