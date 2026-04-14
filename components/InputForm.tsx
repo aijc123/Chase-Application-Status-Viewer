@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ChaseApplicationData } from '../types';
-import { AlertCircle, Code, Search, Loader2, RefreshCw, HelpCircle, ChevronDown, ChevronUp, Zap } from 'lucide-react';
+import { AlertCircle, Code, Loader2, HelpCircle, ChevronDown, ChevronUp, Zap } from 'lucide-react';
 
 interface InputFormProps {
   onDataParsed: (data: ChaseApplicationData[]) => void;
