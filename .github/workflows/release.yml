@@ -3,8 +3,7 @@ name: Release Chrome Extension
 on:
   push:
     tags:
-      - 'v*' # Trigger on tags like v1.0.0
-  workflow_dispatch: # Allows you to click a button to build manually
+      - 'v*'
 
 permissions:
   contents: write
@@ -12,6 +11,13 @@ permissions:
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
+    env:
+      NODE_VERSION: '20'
+      ZIP_NAME: chase-status-viewer.zip
+      CHROME_EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
+      CHROME_CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
+      CHROME_CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
+      CHROME_REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
 
     steps:
       - name: Checkout code
@@ -20,30 +26,116 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          # Cache setting removed to prevent "lock file not found" error
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
 
-      - name: Install Dependencies
-        run: npm install
+      - name: Validate release configuration
+        id: validate
+        shell: bash
+        run: |
+          set -euo pipefail
 
-      - name: Build Project
+          missing=()
+          for name in CHROME_EXTENSION_ID CHROME_CLIENT_ID CHROME_CLIENT_SECRET CHROME_REFRESH_TOKEN; do
+            if [ -z "${!name:-}" ]; then
+              missing+=("$name")
+            fi
+          done
+
+          if [ ${#missing[@]} -gt 0 ]; then
+            printf 'Missing required GitHub Actions secrets: %s\n' "${missing[*]}" >&2
+            exit 1
+          fi
+
+          tag="${GITHUB_REF_NAME}"
+          if [[ ! "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Release tag must match vX.Y.Z. Received: $tag" >&2
+            exit 1
+          fi
+
+          package_version="$(node -p "require('./package.json').version")"
+          manifest_version="$(node -p "require('./public/manifest.json').version")"
+          tag_version="${tag#v}"
+
+          if [ "$package_version" != "$manifest_version" ]; then
+            echo "package.json version ($package_version) does not match public/manifest.json version ($manifest_version)." >&2
+            exit 1
+          fi
+
+          if [ "$tag_version" != "$package_version" ]; then
+            echo "Tag version ($tag_version) does not match package.json/public/manifest.json version ($package_version)." >&2
+            exit 1
+          fi
+
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=$tag_version" >> "$GITHUB_OUTPUT"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build project
         run: npm run build
 
-      - name: Zip Extension
+      - name: Verify built manifest version
+        shell: bash
         run: |
-          cd dist
-          zip -r ../chase-status-viewer.zip .
+          set -euo pipefail
+          built_manifest_version="$(node -p "require('./dist/manifest.json').version")"
+          if [ "$built_manifest_version" != "${{ steps.validate.outputs.version }}" ]; then
+            echo "dist/manifest.json version ($built_manifest_version) does not match release version (${{ steps.validate.outputs.version }})." >&2
+            exit 1
+          fi
 
-      - name: Create Release
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Zip extension
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd dist
+          zip -r "../${ZIP_NAME}" .
+
+      - name: Create GitHub release
+        id: github_release
         uses: softprops/action-gh-release@v1
         with:
-          files: chase-status-viewer.zip
+          files: ${{ env.ZIP_NAME }}
           generate_release_notes: true
-          
-      - name: Upload Artifact (Manual Run)
-        if: github.event_name == 'workflow_dispatch'
-        uses: actions/upload-artifact@v4
-        with:
-          name: chase-status-viewer-zip
-          path: chase-status-viewer.zip
+
+      - name: Upload to Chrome Web Store
+        id: chrome_upload
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx chrome-webstore-upload-cli@3 upload \
+            --source "$ZIP_NAME" \
+            --extension-id "$CHROME_EXTENSION_ID" \
+            --client-id "$CHROME_CLIENT_ID" \
+            --client-secret "$CHROME_CLIENT_SECRET" \
+            --refresh-token "$CHROME_REFRESH_TOKEN"
+
+      - name: Publish to Chrome Web Store
+        id: chrome_publish
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx chrome-webstore-upload-cli@3 publish \
+            --extension-id "$CHROME_EXTENSION_ID" \
+            --client-id "$CHROME_CLIENT_ID" \
+            --client-secret "$CHROME_CLIENT_SECRET" \
+            --refresh-token "$CHROME_REFRESH_TOKEN"
+
+      - name: Write job summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "## Release Summary"
+            echo ""
+            echo "- Release tag: ${{ steps.validate.outputs.tag || github.ref_name }}"
+            echo "- Zip artifact: ${ZIP_NAME}"
+            echo "- GitHub Release: ${{ steps.github_release.outcome }}"
+            echo "- Chrome Web Store upload: ${{ steps.chrome_upload.outcome }}"
+            echo "- Chrome Web Store publish: ${{ steps.chrome_publish.outcome }}"
+          } >> "$GITHUB_STEP_SUMMARY"

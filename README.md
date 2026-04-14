@@ -47,6 +47,25 @@ npm test
 npm run build
 ```
 
+## Release Process
+
+Push a version tag in the format `vX.Y.Z` to trigger the release workflow. A successful run will:
+
+1. Verify the tag version matches both `package.json` and `public/manifest.json`.
+2. Run `npm ci`, `npm test`, and `npm run build`.
+3. Create `chase-status-viewer.zip`.
+4. Create a GitHub Release with the zip attached.
+5. Upload and publish the same package to the Chrome Web Store.
+
+Before tagging a release, configure these GitHub Actions secrets in the repository:
+
+- `CHROME_EXTENSION_ID`
+- `CHROME_CLIENT_ID`
+- `CHROME_CLIENT_SECRET`
+- `CHROME_REFRESH_TOKEN`
+
+If any validation or Chrome Web Store step fails, the release workflow fails so the repository does not report a misleading partial publish.
+
 ## Notes
 
 - Data is processed locally in the browser popup or extension context.
