@@ -13,11 +13,16 @@ export const DocumentStatus: React.FC<DocumentStatusProps> = ({ pendInfo, action
 
   if (!hasDocuments && !hasActions) {
     return (
-        <div className="bg-green-50 border border-green-200 rounded-xl p-6 flex items-center gap-4">
+        <div className="bg-green-50 border border-green-200 rounded-xl p-5 flex items-start gap-4">
             <CheckCircle className="w-8 h-8 text-green-600" />
             <div>
-                <h3 className="font-semibold text-green-900">No Action Required</h3>
-                <p className="text-green-700 text-sm">No pending documents or immediate actions found in the status response.</p>
+                <h3 className="font-semibold text-green-900">No pending items detected</h3>
+                <p className="text-green-800 text-sm">
+                  We did not detect pending documents or immediate actions in this status response.
+                </p>
+                <p className="text-[11px] text-green-700 mt-1">
+                  Please confirm with the official Chase status page, email, or text notifications before assuming no follow-up is needed.
+                </p>
             </div>
         </div>
     );
@@ -25,14 +30,17 @@ export const DocumentStatus: React.FC<DocumentStatusProps> = ({ pendInfo, action
 
   return (
     <div className="bg-white shadow-sm border border-gray-200 rounded-xl overflow-hidden">
-      <div className="bg-amber-50 border-b border-amber-100 px-6 py-4">
+      <div className="bg-amber-50 border-b border-amber-100 px-5 py-4">
         <h3 className="text-lg font-semibold text-amber-900 flex items-center gap-2">
           <FileWarning className="w-5 h-5" />
-          Required Actions & Documents
+          What To Do Next
         </h3>
+        <p className="text-xs text-amber-800 mt-1">
+          Review any requested actions or documents before contacting support.
+        </p>
       </div>
       
-      <div className="p-6 space-y-6">
+      <div className="p-5 space-y-6">
         {hasActions && (
             <div>
                 <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Action List</h4>

@@ -2,6 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { AlertCircle, ChevronDown, ChevronUp, Code, HelpCircle, Loader2, Zap } from 'lucide-react';
 import { ChaseApplicationData } from '../types';
 import { isValidChaseData } from '../utils';
+import {
+  MANUAL_GUIDE_PREFERENCE_KEY,
+  classifyScanError,
+  getScanFeedback,
+  type ScanFeedback,
+} from '../scanFeedback';
 
 interface InputFormProps {
   onDataParsed: (data: ChaseApplicationData[]) => void;
@@ -9,7 +15,7 @@ interface InputFormProps {
 
 export const InputForm: React.FC<InputFormProps> = ({ onDataParsed }) => {
   const [input, setInput] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [scanFeedback, setScanFeedback] = useState<ScanFeedback | null>(null);
   const [isExtension, setIsExtension] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
@@ -18,12 +24,26 @@ export const InputForm: React.FC<InputFormProps> = ({ onDataParsed }) => {
     if (typeof chrome !== 'undefined' && chrome.tabs && chrome.scripting) {
       setIsExtension(true);
     }
+
+    const savedPreference = localStorage.getItem(MANUAL_GUIDE_PREFERENCE_KEY);
+    setShowGuide(savedPreference === null ? true : savedPreference === 'true');
   }, []);
+
+  const updateGuideVisibility = (nextValue: boolean) => {
+    setShowGuide(nextValue);
+    localStorage.setItem(MANUAL_GUIDE_PREFERENCE_KEY, String(nextValue));
+  };
 
   const handleParse = () => {
     try {
       if (!input.trim()) {
-        setError('Please paste JSON first.');
+        setScanFeedback({
+          type: 'unknown',
+          title: 'Paste JSON to continue',
+          message: 'No JSON was provided yet.',
+          nextSteps: ['Paste the full JSON response, then click Parse JSON.'],
+          showGuide: false,
+        });
         return;
       }
 
@@ -35,15 +55,22 @@ export const InputForm: React.FC<InputFormProps> = ({ onDataParsed }) => {
       }
 
       onDataParsed(dataToProcess);
-      setError(null);
+      setScanFeedback(null);
     } catch (err) {
-      setError((err as Error).message);
+      setScanFeedback({
+        type: 'unknown',
+        title: 'JSON could not be parsed',
+        message: (err as Error).message,
+        nextSteps: ['Confirm you copied the full JSON response before parsing again.'],
+        showGuide: true,
+      });
+      updateGuideVisibility(true);
     }
   };
 
   const handleScanTab = async () => {
     setScanning(true);
-    setError(null);
+    setScanFeedback(null);
 
     try {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -58,6 +85,7 @@ export const InputForm: React.FC<InputFormProps> = ({ onDataParsed }) => {
         func: async () => {
           try {
             const entries = performance.getEntriesByType('resource');
+            let hadFetchFailure = false;
             const statusEntry = entries.reverse().find((entry) => {
               const isStatusApi = (entry.name.includes('/applications/') && entry.name.includes('/status'))
                 || entry.name.includes('app-status-api')
@@ -92,7 +120,7 @@ export const InputForm: React.FC<InputFormProps> = ({ onDataParsed }) => {
                   return { result: json, method: 'Log Scan' };
                 }
               } catch {
-                console.log('Log scan fetch failed, trying fallback...');
+                hadFetchFailure = true;
               }
             }
 
@@ -118,8 +146,12 @@ export const InputForm: React.FC<InputFormProps> = ({ onDataParsed }) => {
                   }
                 }
               } catch {
-                // Continue trying other endpoints.
+                hadFetchFailure = true;
               }
+            }
+
+            if (hadFetchFailure) {
+              return { error: 'FETCH_FAILED' };
             }
 
             return { error: 'NOT_FOUND' };
@@ -151,12 +183,10 @@ export const InputForm: React.FC<InputFormProps> = ({ onDataParsed }) => {
       }
     } catch (err: any) {
       const msg = err.message || 'Unknown error';
-      if (msg.includes('NOT_FOUND')) {
-        setError('Could not find status data automatically. Please Refresh page (F5) and try again.');
-        setShowGuide(true);
-      } else {
-        setError(`Scan failed: ${msg.replace('Error: ', '')}. Please Refresh & Try again.`);
-        setShowGuide(true);
+      const feedback = getScanFeedback(classifyScanError(msg));
+      setScanFeedback(feedback);
+      if (feedback.showGuide) {
+        updateGuideVisibility(true);
       }
     } finally {
       setScanning(false);
@@ -170,9 +200,9 @@ export const InputForm: React.FC<InputFormProps> = ({ onDataParsed }) => {
           <Code className="w-5 h-5" />
           Check Status
         </h2>
-        <p className="opacity-90 mt-1 text-[10px] leading-tight">
+        <p className="opacity-90 mt-1 text-xs leading-tight">
           {isExtension
-            ? "Use on 'Application Status' page."
+            ? "Use on the Chase Application Status page after the page has refreshed at least once."
             : 'Paste JSON from network logs.'}
         </p>
       </div>
@@ -183,28 +213,50 @@ export const InputForm: React.FC<InputFormProps> = ({ onDataParsed }) => {
             <button
               onClick={handleScanTab}
               disabled={scanning}
+              aria-label="Scan the current Chase status page"
               className="w-full py-2.5 bg-chase-blue text-white rounded-md font-semibold text-sm shadow hover:bg-blue-700 disabled:opacity-70 transition-all flex items-center justify-center gap-2"
             >
               {scanning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4 fill-current" />}
               {scanning ? 'Scanning...' : 'One-Click Scan'}
             </button>
-            <div className="flex gap-2 justify-center text-[10px] text-blue-700">
-              <span className="flex items-center gap-1 opacity-80">Auto-detects API endpoints</span>
+            <div className="flex gap-2 justify-center text-xs text-blue-700">
+              <span className="flex items-center gap-1 opacity-80">
+                Works best when you are already on the Chase status page and have refreshed it once.
+              </span>
             </div>
           </div>
         )}
 
-        {error && (
-          <div className="p-2.5 bg-red-50 border-l-2 border-red-500 text-red-700 text-xs flex gap-2 rounded-r items-start">
+        {scanFeedback && (
+          <div className="p-3 bg-red-50 border-l-2 border-red-500 text-red-800 text-sm flex gap-2 rounded-r items-start">
             <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-            <div className="leading-tight">{error}</div>
+            <div className="leading-tight space-y-2">
+              <div>
+                <p className="font-semibold">{scanFeedback.title}</p>
+                <p className="text-red-700">{scanFeedback.message}</p>
+              </div>
+              <ul className="list-disc pl-4 space-y-1 text-[11px] text-red-700">
+                {scanFeedback.nextSteps.map((step) => (
+                  <li key={step}>{step}</li>
+                ))}
+              </ul>
+              {scanFeedback.showGuide && !showGuide && (
+                <button
+                  onClick={() => updateGuideVisibility(true)}
+                  className="text-xs font-semibold text-red-800 underline underline-offset-2"
+                >
+                  Show manual JSON steps
+                </button>
+              )}
+            </div>
           </div>
         )}
 
         <div className="border border-blue-100 bg-blue-50 rounded-lg overflow-hidden transition-all">
           <button
-            onClick={() => setShowGuide(!showGuide)}
-            className="w-full flex items-center justify-between p-3 text-left text-xs font-semibold text-blue-800 hover:bg-blue-100 transition-colors"
+            onClick={() => updateGuideVisibility(!showGuide)}
+            className="w-full flex items-center justify-between p-3 text-left text-sm font-semibold text-blue-800 hover:bg-blue-100 transition-colors"
+            aria-expanded={showGuide}
           >
             <div className="flex items-center gap-2">
               <HelpCircle className="w-4 h-4" />
@@ -214,7 +266,7 @@ export const InputForm: React.FC<InputFormProps> = ({ onDataParsed }) => {
           </button>
 
           {showGuide && (
-            <div className="p-3 bg-white border-t border-blue-100 text-[10px] text-gray-600 space-y-2 animate-in slide-in-from-top-1">
+            <div className="p-3 bg-white border-t border-blue-100 text-xs text-gray-700 space-y-2 animate-in slide-in-from-top-1">
               <p>If scanning fails, follow these steps:</p>
               <ol className="list-decimal pl-4 space-y-1.5 marker:text-blue-500">
                 <li>Press <kbd className="font-mono bg-gray-100 px-1 rounded border border-gray-300">F12</kbd> to open Developer Tools.</li>
@@ -237,7 +289,7 @@ export const InputForm: React.FC<InputFormProps> = ({ onDataParsed }) => {
           </div>
 
           <textarea
-            className="w-full h-20 p-2 font-mono text-[10px] bg-gray-50 border border-gray-300 rounded focus:ring-1 focus:ring-chase-blue outline-none placeholder:text-gray-400"
+            className="w-full h-20 p-2 font-mono text-xs bg-gray-50 border border-gray-300 rounded focus:ring-1 focus:ring-chase-blue outline-none placeholder:text-gray-400"
             placeholder="Paste raw JSON here (Starts with [ or { )"
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -247,6 +299,7 @@ export const InputForm: React.FC<InputFormProps> = ({ onDataParsed }) => {
         <div className="flex gap-2 justify-end pt-1">
           <button
             onClick={handleParse}
+            aria-label="Parse pasted JSON"
             className="px-4 py-2 bg-gray-800 text-white rounded-md text-xs font-semibold hover:bg-gray-700"
           >
             Parse JSON

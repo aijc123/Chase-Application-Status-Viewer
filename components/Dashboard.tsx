@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { ChaseApplicationData, GenericAccountStatus } from '../types';
-import { ArrowLeft, Phone, ShieldAlert, CheckCircle2, ChevronRight, CreditCard, Banknote, Filter, Car, TrendingUp } from 'lucide-react';
+import { ArrowLeft, Phone, ShieldAlert, CheckCircle2, ChevronRight, CreditCard, Banknote, Filter, Car, TrendingUp, ChevronDown, ChevronUp } from 'lucide-react';
 import { InfoCard } from './InfoCard';
 import { DocumentStatus } from './DocumentStatus';
 import { RawViewer } from './RawViewer';
@@ -30,6 +30,7 @@ const RECON_NUMBERS = [
 export const Dashboard: React.FC<DashboardProps> = ({ data, onReset }) => {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(data.length === 1 ? 0 : null);
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
+  const [showAdvancedDetails, setShowAdvancedDetails] = useState(false);
 
   // Extract unique statuses for the filter dropdown
   const uniqueStatuses = useMemo(() => {
@@ -109,9 +110,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, onReset }) => {
                                     <h3 className="text-sm font-bold text-gray-800">
                                         {productInfo.label}
                                     </h3>
-                                    <p className="text-xs text-gray-500 font-mono mt-0.5">
-                                        Code: {statusObj?.productCode}-{statusObj?.subProductCode}
-                                    </p>
                                     <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold mt-2 ${
                                         statusInfo.sentiment === 'success' ? 'bg-green-100 text-green-700' :
                                         statusInfo.sentiment === 'error' ? 'bg-red-100 text-red-700' :
@@ -185,6 +183,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, onReset }) => {
         </div>
       </div>
 
+      <DocumentStatus
+          pendInfo={mainStatus.pendRequiredInformation}
+          actionList={mainStatus.statusAdditionalInformation?.requiredActionList}
+      />
+
       {/* Info Grid */}
       <div className="grid grid-cols-2 gap-3">
         <InfoCard
@@ -225,6 +228,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, onReset }) => {
       {(mainStatus.statusAdditionalInformation?.errors?.length || 0) > 0 && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-3">
             <h3 className="text-xs font-bold text-red-800 mb-2 uppercase">Errors Detected</h3>
+            <p className="text-[11px] text-red-700 mb-2">
+              Search results are reference-only and may include non-official explanations.
+            </p>
             <div className="space-y-1">
                 {mainStatus.statusAdditionalInformation?.errors?.map((err, idx) => (
                     <div key={idx} className="bg-white px-2 py-1 rounded border border-red-100 text-red-700 font-mono text-xs flex justify-between">
@@ -236,24 +242,37 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, onReset }) => {
         </div>
       )}
 
-      <DocumentStatus
-          pendInfo={mainStatus.pendRequiredInformation}
-          actionList={mainStatus.statusAdditionalInformation?.requiredActionList}
-      />
+      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setShowAdvancedDetails((current) => !current)}
+          className="w-full flex items-center justify-between px-3 py-3 bg-gray-50 hover:bg-gray-100 transition-colors"
+          aria-expanded={showAdvancedDetails}
+        >
+          <div className="text-left">
+            <h3 className="text-sm font-semibold text-gray-700">Advanced Details</h3>
+            <p className="text-[11px] text-gray-500">Technical fields and raw data for deeper troubleshooting.</p>
+          </div>
+          {showAdvancedDetails ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
+        </button>
 
-      {/* Meta Data */}
-      <div className="bg-white border border-gray-200 rounded-lg p-3">
-        <h3 className="text-[10px] font-bold text-gray-400 uppercase mb-2">Details</h3>
-        <div className="space-y-1 text-xs">
-            <MetaRow label="Product Type" value={productInfo.label} />
-            <MetaRow label="Product Code" value={`${mainStatus.productCode} (${mainStatus.subProductCode})`} />
-            <MetaRow label="Source" value={mainStatus.acquisitionSourceName || '-'} />
-            <MetaRow label="App ID" value={appData.productApplicationIdentifier} truncate />
-            <MetaRow label="Created" value={formatDate(appData.applicationCreateTimestamp)} />
-        </div>
+        {showAdvancedDetails && (
+          <div className="p-3 space-y-3 border-t border-gray-200">
+            <div className="bg-white border border-gray-200 rounded-lg p-3">
+              <h4 className="text-[10px] font-bold text-gray-400 uppercase mb-2">Details</h4>
+              <div className="space-y-1 text-xs">
+                  <MetaRow label="Product Type" value={productInfo.label} />
+                  <MetaRow label="Product Code" value={`${mainStatus.productCode} (${mainStatus.subProductCode})`} />
+                  <MetaRow label="Source" value={mainStatus.acquisitionSourceName || '-'} />
+                  <MetaRow label="App ID" value={appData.productApplicationIdentifier} truncate />
+                  <MetaRow label="Created" value={formatDate(appData.applicationCreateTimestamp)} />
+              </div>
+            </div>
+
+            <RawViewer data={appData} />
+          </div>
+        )}
       </div>
-
-      <RawViewer data={appData} />
     </div>
   );
 };

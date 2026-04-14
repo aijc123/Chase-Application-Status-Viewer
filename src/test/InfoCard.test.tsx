@@ -54,4 +54,13 @@ describe('InfoCard', () => {
     render(<InfoCard label="Label" value="Value" tooltip="Helpful tip" />);
     expect(screen.getByText('Helpful tip')).toBeInTheDocument();
   });
+
+  it('exposes tooltip through a focusable trigger', () => {
+    render(<InfoCard label="Updated" value="Value" tooltip="Helpful tip" />);
+
+    const trigger = screen.getByRole('button', { name: 'Updated help' });
+    const tooltip = screen.getByRole('tooltip');
+
+    expect(trigger).toHaveAttribute('aria-describedby', tooltip.id);
+  });
 });

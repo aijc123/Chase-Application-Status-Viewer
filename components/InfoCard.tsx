@@ -17,6 +17,7 @@ export const InfoCard: React.FC<InfoCardProps> = ({
   tooltip
 }) => {
   const [copied, setCopied] = useState(false);
+  const tooltipId = tooltip ? `info-tooltip-${label.replace(/\s+/g, '-').toLowerCase()}` : undefined;
 
   const handleCopy = async () => {
     try {
@@ -36,8 +37,19 @@ export const InfoCard: React.FC<InfoCardProps> = ({
         </h3>
         {tooltip && (
             <div className="group relative">
-                <HelpCircle className="w-3 h-3 text-gray-300" />
-                <div className="absolute right-0 w-32 p-1.5 mt-1 text-[10px] text-white bg-gray-800 rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10 pointer-events-none">
+                <button
+                  type="button"
+                  aria-label={`${label} help`}
+                  aria-describedby={tooltipId}
+                  className="rounded text-gray-300 hover:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chase-blue"
+                >
+                  <HelpCircle className="w-3.5 h-3.5" />
+                </button>
+                <div
+                  id={tooltipId}
+                  role="tooltip"
+                  className="absolute right-0 w-36 p-1.5 mt-1 text-[11px] text-white bg-gray-800 rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible transition-all z-10 pointer-events-none"
+                >
                     {tooltip}
                 </div>
             </div>
