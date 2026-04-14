@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Chase Application Status Viewer",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "Unofficial tool to visualize Chase Credit Card application status for reconsideration calls.",
   "action": {
     "default_popup": "index.html",
@@ -19,8 +19,7 @@
     "storage"
   ],
   "host_permissions": [
-    "https://*.chase.com/*",
-    "https://api.github.com/*"
+    "https://*.chase.com/*"
   ],
   "icons": {
     "16": "icon16.png",

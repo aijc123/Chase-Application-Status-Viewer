@@ -2,9 +2,11 @@ import React, { useState, useEffect, Component } from 'react';
 import { ChaseApplicationData } from './types';
 import { InputForm } from './components/InputForm';
 import { Dashboard } from './components/Dashboard';
-import { UpdateBanner } from './components/UpdateBanner';
-import { ShieldCheck } from 'lucide-react';
+import { ExternalLink, Github, ShieldCheck } from 'lucide-react';
 import { getCurrentVersion } from './version';
+
+const GITHUB_REPO_URL = 'https://github.com/aijc123/Chase-Application-Status-Viewer';
+const CHROME_WEB_STORE_URL = 'https://chromewebstore.google.com/detail/chase-application-status/lljgnhhealbjbnenmmidncipmgbahggh';
 
 class ErrorBoundary extends Component<{ children: React.ReactNode }, { hasError: boolean }> {
   state = { hasError: false };
@@ -95,9 +97,6 @@ const App: React.FC = () => {
         </div>
       </header>
       
-      {/* Update Notification */}
-      <UpdateBanner />
-
       {/* Main Content */}
       <main className="flex-grow bg-gray-50 p-3 overflow-y-auto">
         <div className="mx-auto">
@@ -111,10 +110,30 @@ const App: React.FC = () => {
 
       {/* Footer */}
       <footer className="bg-white border-t border-gray-200 mt-auto">
-        <div className="px-3 py-1.5">
+        <div className="px-3 py-2 space-y-1.5">
+          <div className="flex items-center justify-center gap-3 text-[10px]">
+            <a
+              href={CHROME_WEB_STORE_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1 text-gray-500 hover:text-chase-blue transition-colors"
+            >
+              <ExternalLink className="h-3 w-3" />
+              Chrome Web Store
+            </a>
+            <a
+              href={GITHUB_REPO_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1 text-gray-500 hover:text-chase-blue transition-colors"
+            >
+              <Github className="h-3 w-3" />
+              GitHub
+            </a>
+          </div>
           <p className="text-center text-[9px] text-gray-400 leading-tight">
             Unofficial tool. Runs locally. <br/>
-            Not affiliated with JPMorgan Chase & Co.
+            Chrome Web Store installs update automatically.
           </p>
         </div>
       </footer>
