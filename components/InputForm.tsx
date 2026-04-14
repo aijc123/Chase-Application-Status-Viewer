@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { AlertCircle, ChevronDown, ChevronUp, Code, HelpCircle, Loader2, Zap } from 'lucide-react';
 import { ChaseApplicationData } from '../types';
-import { isValidChaseData } from '../utils';
+import { isAllowedChaseUrl, isValidChaseData } from '../utils';
 import {
   MANUAL_GUIDE_PREFERENCE_KEY,
   classifyScanError,
@@ -76,7 +76,7 @@ export const InputForm: React.FC<InputFormProps> = ({ onDataParsed }) => {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
       if (!tab.id) throw new Error('No active tab.');
 
-      if (!tab.url?.includes('chase.com')) {
+      if (!isAllowedChaseUrl(tab.url)) {
         throw new Error('Wrong Site. Go to Chase.com Application Status page.');
       }
 

@@ -4,9 +4,20 @@ import { InputForm } from './components/InputForm';
 import { Dashboard } from './components/Dashboard';
 import { ExternalLink, Github, ShieldCheck } from 'lucide-react';
 import { getCurrentVersion } from './version';
+import { CHASE_STATUS_STORAGE_KEY, isValidChaseData } from './utils';
 
 const GITHUB_REPO_URL = 'https://github.com/aijc123/Chase-Application-Status-Viewer';
 const CHROME_WEB_STORE_URL = 'https://chromewebstore.google.com/detail/chase-application-status/lljgnhhealbjbnenmmidncipmgbahggh';
+
+function restorePersistedData(candidate: unknown): ChaseApplicationData[] | null {
+  if (!candidate || !isValidChaseData(candidate)) {
+    return null;
+  }
+
+  return Array.isArray(candidate)
+    ? (candidate as ChaseApplicationData[])
+    : [candidate as ChaseApplicationData];
+}
 
 class ErrorBoundary extends Component<{ children: React.ReactNode }, { hasError: boolean }> {
   state = { hasError: false };
@@ -30,27 +41,32 @@ class ErrorBoundary extends Component<{ children: React.ReactNode }, { hasError:
 }
 
 const App: React.FC = () => {
-  // Now storing an Array of applications
   const [data, setData] = useState<ChaseApplicationData[] | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Load data from Chrome storage on startup
   useEffect(() => {
     if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-      chrome.storage.local.get(['chaseStatusDataArray'], (result: { [key: string]: ChaseApplicationData[] }) => {
-        if (result.chaseStatusDataArray) {
-          setData(result.chaseStatusDataArray);
+      chrome.storage.local.get([CHASE_STATUS_STORAGE_KEY], (result: { [key: string]: unknown }) => {
+        const restored = restorePersistedData(result[CHASE_STATUS_STORAGE_KEY]);
+        if (restored) {
+          setData(restored);
+        } else if (result[CHASE_STATUS_STORAGE_KEY]) {
+          chrome.storage.local.remove([CHASE_STATUS_STORAGE_KEY]);
         }
         setLoading(false);
       });
     } else {
-      // Web mode
-      const localData = localStorage.getItem('chaseStatusDataArray');
+      const localData = localStorage.getItem(CHASE_STATUS_STORAGE_KEY);
       if (localData) {
         try {
-          setData(JSON.parse(localData));
-        } catch (e) {
-          console.error("Failed to parse local data");
+          const restored = restorePersistedData(JSON.parse(localData));
+          if (restored) {
+            setData(restored);
+          } else {
+            localStorage.removeItem(CHASE_STATUS_STORAGE_KEY);
+          }
+        } catch {
+          localStorage.removeItem(CHASE_STATUS_STORAGE_KEY);
         }
       }
       setLoading(false);
@@ -59,21 +75,19 @@ const App: React.FC = () => {
 
   const handleSetData = (newData: ChaseApplicationData[]) => {
     setData(newData);
-    // Persist data
     if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-      chrome.storage.local.set({ chaseStatusDataArray: newData });
+      chrome.storage.local.set({ [CHASE_STATUS_STORAGE_KEY]: newData });
     } else {
-      localStorage.setItem('chaseStatusDataArray', JSON.stringify(newData));
+      localStorage.setItem(CHASE_STATUS_STORAGE_KEY, JSON.stringify(newData));
     }
   };
 
   const handleReset = () => {
     setData(null);
-    // Clear persistence
     if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-      chrome.storage.local.remove(['chaseStatusDataArray']);
+      chrome.storage.local.remove([CHASE_STATUS_STORAGE_KEY]);
     } else {
-      localStorage.removeItem('chaseStatusDataArray');
+      localStorage.removeItem(CHASE_STATUS_STORAGE_KEY);
     }
   };
 

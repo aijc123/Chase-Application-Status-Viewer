@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { formatDate, getTimeAgo, compareVersions, isValidChaseData } from '../../utils';
+import { formatDate, getTimeAgo, compareVersions, isAllowedChaseUrl, isValidChaseData } from '../../utils';
 
-// ══════════════════════════════════════════════════════════════════════════
 describe('formatDate', () => {
   it('returns N/A for undefined', () => {
     expect(formatDate(undefined)).toBe('N/A');
@@ -75,6 +74,19 @@ describe('compareVersions', () => {
   it('handles versions with different segment counts', () => {
     expect(compareVersions('1.0.0.1', '1.0.0')).toBe(1);
     expect(compareVersions('1.0', '1.0.0')).toBe(0);
+  });
+});
+
+describe('isAllowedChaseUrl', () => {
+  it('accepts the Chase apex domain and subdomains', () => {
+    expect(isAllowedChaseUrl('https://chase.com/status')).toBe(true);
+    expect(isAllowedChaseUrl('https://secure.chase.com/web/auth')).toBe(true);
+  });
+
+  it('rejects lookalike and invalid URLs', () => {
+    expect(isAllowedChaseUrl('https://chase.com.evil.example/status')).toBe(false);
+    expect(isAllowedChaseUrl('notaurl')).toBe(false);
+    expect(isAllowedChaseUrl(undefined)).toBe(false);
   });
 });
 

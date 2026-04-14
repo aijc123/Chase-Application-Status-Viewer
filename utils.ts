@@ -6,6 +6,8 @@ const STATUS_COLLECTION_KEYS = [
   'investmentAccountStatus',
 ] as const;
 
+export const CHASE_STATUS_STORAGE_KEY = 'chaseStatusDataArray';
+
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
@@ -48,6 +50,18 @@ export function compareVersions(v1: string, v2: string): number {
     if (n1 < n2) return -1;
   }
   return 0;
+}
+
+export function isAllowedChaseUrl(url?: string): boolean {
+  if (!url) return false;
+
+  try {
+    const { hostname } = new URL(url);
+    const normalizedHost = hostname.toLowerCase();
+    return normalizedHost === 'chase.com' || normalizedHost.endsWith('.chase.com');
+  } catch {
+    return false;
+  }
 }
 
 export function isValidChaseData(parsed: unknown): boolean {
