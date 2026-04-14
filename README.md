@@ -59,7 +59,7 @@ Push a version tag in the format `vX.Y.Z` to trigger the release workflow. A suc
 
 Before tagging a release, configure these GitHub Actions secrets in the repository:
 
-- `CHROME_EXTENSION_ID`
+- `CHROME_EXTENSION_ID` set to `lljgnhhealbjbnenmmidncipmgbahggh`
 - `CHROME_CLIENT_ID`
 - `CHROME_CLIENT_SECRET`
 - `CHROME_REFRESH_TOKEN`

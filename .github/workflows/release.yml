@@ -14,6 +14,7 @@ jobs:
     env:
       NODE_VERSION: '20'
       ZIP_NAME: chase-status-viewer.zip
+      EXPECTED_CHROME_EXTENSION_ID: lljgnhhealbjbnenmmidncipmgbahggh
       CHROME_EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
       CHROME_CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
       CHROME_CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
@@ -22,12 +23,24 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
+
+      - name: Print release diagnostics
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --version
+          npm --version
+          git --version
+          echo "Target Chrome Web Store item: ${EXPECTED_CHROME_EXTENSION_ID}"
+          echo "Ref name: ${GITHUB_REF_NAME}"
 
       - name: Validate release configuration
         id: validate
@@ -44,6 +57,11 @@ jobs:
 
           if [ ${#missing[@]} -gt 0 ]; then
             printf 'Missing required GitHub Actions secrets: %s\n' "${missing[*]}" >&2
+            exit 1
+          fi
+
+          if [ "$CHROME_EXTENSION_ID" != "$EXPECTED_CHROME_EXTENSION_ID" ]; then
+            echo "CHROME_EXTENSION_ID secret does not match the expected public listing ID ($EXPECTED_CHROME_EXTENSION_ID)." >&2
             exit 1
           fi
 
@@ -71,7 +89,23 @@ jobs:
           echo "version=$tag_version" >> "$GITHUB_OUTPUT"
 
       - name: Install dependencies
-        run: npm ci
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --foreground-scripts --loglevel verbose
+
+      - name: Print npm debug log on install failure
+        if: failure()
+        shell: bash
+        run: |
+          set -euo pipefail
+          latest_log="$(ls -1t "$HOME/.npm/_logs"/*-debug-0.log 2>/dev/null | head -n 1 || true)"
+          if [ -n "$latest_log" ]; then
+            echo "Showing npm debug log: $latest_log"
+            cat "$latest_log"
+          else
+            echo "No npm debug log found."
+          fi
 
       - name: Run tests
         run: npm test
