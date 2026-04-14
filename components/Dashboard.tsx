@@ -315,12 +315,16 @@ const MetaRow: React.FC<{ label: string; value: string; truncate?: boolean }> = 
 
 function formatDate(isoString?: string) {
     if (!isoString) return 'N/A';
-    return new Date(isoString).toLocaleDateString(undefined, { month:'numeric', day:'numeric', year:'2-digit' });
+    const d = new Date(isoString);
+    if (isNaN(d.getTime())) return 'N/A';
+    return d.toLocaleDateString(undefined, { month: 'numeric', day: 'numeric', year: '2-digit' });
 }
 
 function getTimeAgo(isoString?: string) {
     if (!isoString) return '';
-    const diff = Date.now() - new Date(isoString).getTime();
+    const d = new Date(isoString);
+    if (isNaN(d.getTime())) return '';
+    const diff = Date.now() - d.getTime();
     const minutes = Math.floor(diff / 60000);
     const hours = Math.floor(minutes / 60);
     const days = Math.floor(hours / 24);

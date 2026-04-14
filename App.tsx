@@ -5,9 +5,6 @@ import { Dashboard } from './components/Dashboard';
 import { UpdateBanner } from './components/UpdateBanner';
 import { ShieldCheck } from 'lucide-react';
 
-// Declare chrome API
-declare var chrome: any;
-
 const App: React.FC = () => {
   // Now storing an Array of applications
   const [data, setData] = useState<ChaseApplicationData[] | null>(null);
@@ -16,7 +13,7 @@ const App: React.FC = () => {
   // Load data from Chrome storage on startup
   useEffect(() => {
     if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-      chrome.storage.local.get(['chaseStatusDataArray'], (result: any) => {
+      chrome.storage.local.get(['chaseStatusDataArray'], (result: { [key: string]: ChaseApplicationData[] }) => {
         if (result.chaseStatusDataArray) {
           setData(result.chaseStatusDataArray);
         }
@@ -70,7 +67,7 @@ const App: React.FC = () => {
             <h1 className="text-sm font-bold tracking-tight">Chase Status</h1>
           </div>
           <div className="text-[10px] text-gray-300">
-            v1.0.4
+            v{typeof chrome !== 'undefined' && chrome.runtime?.getManifest ? chrome.runtime.getManifest().version : '1.0.4'}
           </div>
         </div>
       </header>

@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { ChaseApplicationData } from '../types';
 import { ChevronDown, ChevronRight, FileJson } from 'lucide-react';
 
-// Can accept a single app object or the whole array, typing as any for flexibility in debug
-export const RawViewer: React.FC<{ data: any }> = ({ data }) => {
+export const RawViewer: React.FC<{ data: ChaseApplicationData }> = ({ data }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (

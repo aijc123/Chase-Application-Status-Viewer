@@ -1,5 +1,5 @@
-import React from 'react';
-import { Copy, HelpCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { Copy, Check, HelpCircle } from 'lucide-react';
 
 interface InfoCardProps {
   label: string;
@@ -16,8 +16,16 @@ export const InfoCard: React.FC<InfoCardProps> = ({
   copyable,
   tooltip
 }) => {
-  const handleCopy = () => {
-    navigator.clipboard.writeText(value);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // Clipboard access denied — silently ignore
+    }
   };
 
   return (
@@ -43,10 +51,10 @@ export const InfoCard: React.FC<InfoCardProps> = ({
         {copyable && (
           <button
             onClick={handleCopy}
-            className="text-gray-400 hover:text-chase-blue transition-colors"
-            title="Copy"
+            className={`transition-colors ${copied ? 'text-green-500' : 'text-gray-400 hover:text-chase-blue'}`}
+            title={copied ? 'Copied!' : 'Copy'}
           >
-            <Copy className="w-3 h-3" />
+            {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
           </button>
         )}
       </div>
