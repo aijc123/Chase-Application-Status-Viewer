@@ -3,7 +3,7 @@ import { Download, X, Sparkles } from 'lucide-react';
 
 // ⚠️ IMPORTANT: Change this to your actual GitHub "User/Repo"
 // Example: "lemo-cor/chase-status-viewer"
-const GITHUB_REPO = "YOUR_GITHUB_USER/YOUR_REPO_NAME";
+const GITHUB_REPO = "aijc123/Chase-Application-Status-Viewer";
 
 const UPDATE_CACHE_KEY = 'chase_update_cache';
 const UPDATE_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
