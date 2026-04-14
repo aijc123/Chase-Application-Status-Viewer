@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { formatDate, getTimeAgo, compareVersions, isValidChaseData } from '../utils';
+import { formatDate, getTimeAgo, compareVersions, isValidChaseData } from '../../utils';
 
 // ══════════════════════════════════════════════════════════════════════════
 describe('formatDate', () => {
@@ -89,6 +89,11 @@ describe('isValidChaseData', () => {
     expect(isValidChaseData({ ...baseId, cardAccountStatus: [] })).toBe(false);
   });
 
+  it('rejects data when status fields have the wrong shape', () => {
+    expect(isValidChaseData({ ...baseId, cardAccountStatus: 'APPROVED' })).toBe(false);
+    expect(isValidChaseData({ ...baseId, depositAccountStatus: { productApplicationStatusCode: 'PEND_REVIEW' } })).toBe(false);
+  });
+
   it('accepts data with a non-empty cardAccountStatus', () => {
     expect(isValidChaseData({ ...baseId, cardAccountStatus: [{ productApplicationStatusCode: 'APPROVED' }] })).toBe(true);
   });
@@ -109,5 +114,9 @@ describe('isValidChaseData', () => {
 
   it('rejects non-Chase JSON', () => {
     expect(isValidChaseData({ foo: 'bar' })).toBe(false);
+  });
+
+  it('rejects blank application identifiers even when status arrays exist', () => {
+    expect(isValidChaseData({ productApplicationIdentifier: '   ', cardAccountStatus: [{ productApplicationStatusCode: 'APPROVED' }] })).toBe(false);
   });
 });

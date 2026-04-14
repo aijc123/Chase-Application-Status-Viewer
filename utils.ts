@@ -1,4 +1,21 @@
-import { ChaseApplicationData } from './types';
+const STATUS_COLLECTION_KEYS = [
+  'cardAccountStatus',
+  'enrollmentProductStatus',
+  'depositAccountStatus',
+  'lendingAccountStatus',
+  'investmentAccountStatus',
+] as const;
+
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function hasNonEmptyStatusCollection(item: Record<string, unknown>): boolean {
+  return STATUS_COLLECTION_KEYS.some((key) => {
+    const value = item[key];
+    return Array.isArray(value) && value.some(isObject);
+  });
+}
 
 export function formatDate(isoString?: string): string {
   if (!isoString) return 'N/A';
@@ -35,13 +52,13 @@ export function compareVersions(v1: string, v2: string): number {
 
 export function isValidChaseData(parsed: unknown): boolean {
   const items = Array.isArray(parsed) ? parsed : [parsed];
-  return (items as ChaseApplicationData[]).some(item =>
-    item.productApplicationIdentifier && (
-      ((item.cardAccountStatus as unknown[])?.length ?? 0) > 0 ||
-      ((item.enrollmentProductStatus as unknown[])?.length ?? 0) > 0 ||
-      ((item.depositAccountStatus as unknown[])?.length ?? 0) > 0 ||
-      ((item.lendingAccountStatus as unknown[])?.length ?? 0) > 0 ||
-      ((item.investmentAccountStatus as unknown[])?.length ?? 0) > 0
-    )
-  );
+
+  return items.some((item) => {
+    if (!isObject(item)) return false;
+
+    const applicationId = item.productApplicationIdentifier;
+    return typeof applicationId === 'string'
+      && applicationId.trim().length > 0
+      && hasNonEmptyStatusCollection(item);
+  });
 }

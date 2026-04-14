@@ -7,7 +7,9 @@
       "Bash(xxd \"C:/Users/eric_ai/OneDrive/Code_Github/Chase-Application-Status-Viewer/.github/workflows/gh-pages.yml\")",
       "Bash(npm run *)",
       "Bash(git add *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(git tag *)"
     ]
   }
 }
