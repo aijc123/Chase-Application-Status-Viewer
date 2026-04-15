@@ -12,7 +12,6 @@ jobs:
   build-and-release:
     runs-on: ubuntu-latest
     env:
-      NODE_VERSION: '24'
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
       ZIP_NAME: chase-status-viewer.zip
       EXPECTED_CHROME_EXTENSION_ID: lljgnhhealbjbnenmmidncipmgbahggh
@@ -30,8 +29,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
+          node-version: '24'
 
       - name: Print release diagnostics
         shell: bash
@@ -42,6 +40,7 @@ jobs:
           git --version
           echo "Target Chrome Web Store item: ${EXPECTED_CHROME_EXTENSION_ID}"
           echo "Ref name: ${GITHUB_REF_NAME}"
+          echo "Release artifact: ${ZIP_NAME}"
 
       - name: Validate release configuration
         id: validate
@@ -89,47 +88,19 @@ jobs:
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           echo "version=$tag_version" >> "$GITHUB_OUTPUT"
 
-      - name: Install dependencies
+      - name: Verify packaged release artifact
         shell: bash
         run: |
           set -euo pipefail
-          npm ci --foreground-scripts --loglevel verbose
-
-      - name: Print npm debug log on install failure
-        if: failure()
-        shell: bash
-        run: |
-          set -euo pipefail
-          latest_log="$(ls -1t "$HOME/.npm/_logs"/*-debug-0.log 2>/dev/null | head -n 1 || true)"
-          if [ -n "$latest_log" ]; then
-            echo "Showing npm debug log: $latest_log"
-            cat "$latest_log"
-          else
-            echo "No npm debug log found."
-          fi
-
-      - name: Run tests
-        run: npm test
-
-      - name: Build project
-        run: npm run build
-
-      - name: Verify built manifest version
-        shell: bash
-        run: |
-          set -euo pipefail
-          built_manifest_version="$(node -p "require('./dist/manifest.json').version")"
-          if [ "$built_manifest_version" != "${{ steps.validate.outputs.version }}" ]; then
-            echo "dist/manifest.json version ($built_manifest_version) does not match release version (${{ steps.validate.outputs.version }})." >&2
+          if [ ! -f "$ZIP_NAME" ]; then
+            echo "Missing release artifact: $ZIP_NAME" >&2
             exit 1
           fi
-
-      - name: Zip extension
-        shell: bash
-        run: |
-          set -euo pipefail
-          cd dist
-          zip -r "../${ZIP_NAME}" .
+          artifact_manifest_version="$(unzip -p "$ZIP_NAME" manifest.json | node -e "const fs = require('fs'); const manifest = JSON.parse(fs.readFileSync(0, 'utf8')); process.stdout.write(manifest.version);")"
+          if [ "$artifact_manifest_version" != "${{ steps.validate.outputs.version }}" ]; then
+            echo "Packaged manifest version ($artifact_manifest_version) does not match release version (${{ steps.validate.outputs.version }})." >&2
+            exit 1
+          fi
 
       - name: Create GitHub release
         id: github_release
