@@ -235,7 +235,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, onReset }) => {
                 {mainStatus.statusAdditionalInformation?.errors?.map((err, idx) => (
                     <div key={idx} className="bg-white px-2 py-1 rounded border border-red-100 text-red-700 font-mono text-xs flex justify-between">
                         <span>{err.errorCode}</span>
-                        <a href={`https://www.google.com/search?q=Chase+error+code+${err.errorCode}`} target="_blank" className="underline opacity-70">Search</a>
+                        <a href={`https://www.google.com/search?q=${encodeURIComponent(`Chase error code ${err.errorCode}`)}`} target="_blank" className="underline opacity-70">Search</a>
                     </div>
                 ))}
             </div>
