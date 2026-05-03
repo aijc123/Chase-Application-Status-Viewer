@@ -15,5 +15,20 @@ export default defineConfig({
     setupFiles: ['./src/test/setup.ts'],
     include: ['src/test/**/*.test.ts', 'src/test/**/*.test.tsx'],
     exclude: ['.claude/**', 'dist/**', 'node_modules/**'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json-summary', 'lcov'],
+      reportsDirectory: './coverage',
+      include: ['App.tsx', 'components/**/*.{ts,tsx}', 'src/**/*.{ts,tsx}', '*.ts'],
+      exclude: [
+        'src/test/**',
+        '**/*.d.ts',
+        'dist/**',
+        'node_modules/**',
+        '.claude/**',
+        'coverage/**',
+        'vite.config.ts',
+      ],
+    },
   },
 })

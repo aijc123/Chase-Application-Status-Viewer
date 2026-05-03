@@ -1,5 +1,7 @@
 # Chase Application Status Viewer
 
+[![codecov](https://codecov.io/gh/aijc123/Chase-Application-Status-Viewer/branch/main/graph/badge.svg)](https://codecov.io/gh/aijc123/Chase-Application-Status-Viewer)
+
 An unofficial browser extension that helps surface detailed Chase application status data from the browser session. It is designed for local use and does not require packet-capture tools.
 
 ## What It Does
